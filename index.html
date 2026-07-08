@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AQA AS-Level Biology Streak Challenge</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React and ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel for Browser JSX Translation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Firebase Compat CDNs (Ensures zero-config global loading) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    /* Custom animation classes */
+    .animate-fade-in {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+  <div id="root"></div>
+
+  <!-- React Code Component -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // --- INLINE SVG COMPONENTS ---
+    const BookOpenIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+      </svg>
+    );
+
+    const Volume2Icon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+      </svg>
+    );
+
+    const VolumeXIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+        <line x1="23" y1="9" x2="17" y2="15" />
+        <line x1="17" y1="9" x2="23" y2="15" />
+      </svg>
+    );
+
+    const SparklesIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z" />
+        <path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5z" />
+        <path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z" />
+      </svg>
+    );
+
+    const PlayIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="5 3 19 12 5 21 5 3" />
+      </svg>
+    );
+
+    const ClockIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </svg>
+    );
+
+    const TrophyIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+        <path d="M4 22h16" />
+        <path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34" />
+        <path d="M12 2a6 6 0 0 1 6 6v4a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8a6 6 0 0 1 6-6Z" />
+      </svg>
+    );
+
+    const FlameIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+      </svg>
+    );
+
+    const CheckCircleIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
+      </svg>
+    );
+
+    const XCircleIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="15" y1="9" x2="9" y2="15" />
+        <line x1="9" y1="9" x2="15" y2="15" />
+      </svg>
+    );
+
+    const ShieldAlertIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+    );
+
+    const RotateCcwIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+        <polyline points="3 3 3 8 8 8" />
+      </svg>
+    );
+
+    const HelpCircleIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+      </svg>
+    );
+
+    const UserIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+    );
+
+    const SettingsIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+      </svg>
+    );
+
+    // --- QUESTIONS DATABASE (100 premium AQA AS-Level Biology Questions) ---
+    const QUESTIONS = [
+      {
+        "Question": "Which type of bond is formed during a condensation reaction between two monosaccharides?",
+        "Answers": ["Glycosidic bond", "Phosphodiester bond", "Ester bond", "Peptide bond"],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the structural difference between alpha-glucose and beta-glucose?",
+        "Answers": [
+          "The position of the hydroxyl (-OH) group on carbon-1",
+          "The number of carbon atoms in the ring",
+          "The presence of an extra oxygen atom in beta-glucose",
+          "The position of the amine group on carbon-4"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which of the following describes the structure of amylose?",
+        "Answers": [
+          "An unbranched coiled chain of alpha-glucose with 1,4-glycosidic bonds",
+          "An unbranched chain of beta-glucose with 1,4-glycosidic bonds",
+          "A highly branched chain of alpha-glucose with 1,4 and 1,6-glycosidic bonds",
+          "A straight polymer of beta-glucose forming microfibrils"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Why is glycogen a highly suitable storage molecule in animals?",
+        "Answers": [
+          "It is highly branched, allowing rapid hydrolysis into glucose",
+          "It is completely soluble in water",
+          "It is made of beta-glucose monomers that resist enzyme breakdown",
+          "It exerts a high osmotic pressure inside cells"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which statement correctly describes cellulose?",
+        "Answers": [
+          "It consists of long, straight chains of beta-glucose with cross-linking hydrogen bonds",
+          "It is a polymer of alpha-glucose held together by hydrogen bonds",
+          "It is a branched globular carbohydrate used for energy storage in plants",
+          "It contains both ester and glycosidic bonds"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the correct procedure for testing a non-reducing sugar using Benedict's reagent?",
+        "Answers": [
+          "Boil with dilute HCl, neutralize with sodium hydrogencarbonate, then heat with Benedict's",
+          "Add Benedict's reagent and heat directly in a water bath",
+          "Mix with ethanol, shake, then pour into water to look for a milky emulsion",
+          "Add Biuret solution at room temperature and observe for a purple color change"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "How many water molecules are released during the formation of a single triglyceride?",
+        "Answers": ["3", "1", "2", "4"],
+        "Correct": 1
+      },
+      {
+        "Question": "Which statement accurately describes a phospholipid?",
+        "Answers": [
+          "It has a hydrophilic phosphate head and hydrophobic fatty acid tails",
+          "It contains three fatty acids and a modified sugar group",
+          "It has a hydrophobic phosphate head and hydrophilic fatty acid tails",
+          "It consists of non-polar molecules held entirely by ester links with no glycerol"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which test confirms the presence of a lipid in a sample?",
+        "Answers": [
+          "Emulsion test with ethanol and water yielding a milky white layer",
+          "Biuret test yielding a purple solution",
+          "Iodine test resulting in a blue-black precipitate",
+          "Benedict's test resulting in a brick-red precipitate"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What are the essential components attached to the central carbon atom of an amino acid?",
+        "Answers": [
+          "An amine group, a carboxyl group, a hydrogen atom, and a variable R group",
+          "A phosphate group, a hexose sugar, and a nitrogenous base",
+          "Two fatty acids, a glycerol molecule, and a phosphate group",
+          "An aldehyde group, a ketone group, and a variable hydroxyl chain"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What type of bond maintains the secondary structure (alpha-helix or beta-pleated sheet) of a protein?",
+        "Answers": ["Hydrogen bonds", "Disulfide bridges", "Ionic bonds", "Peptide bonds"],
+        "Correct": 1
+      },
+      {
+        "Question": "Which structural level of a protein is defined by the specific sequence of amino acids in a polypeptide chain?",
+        "Answers": ["Primary structure", "Secondary structure", "Tertiary structure", "Quaternary structure"],
+        "Correct": 1
+      },
+      {
+        "Question": "What type of bonds are involved in stabilizing the tertiary structure of a protein?",
+        "Answers": [
+          "Hydrogen bonds, ionic bonds, hydrophobic interactions, and disulfide bridges",
+          "Peptide bonds only",
+          "Glycosidic and ester bonds",
+          "Phosphodiester links and hydrogen bonds"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "How does the induced-fit model of enzyme action differ from the lock-and-key model?",
+        "Answers": [
+          "The active site changes shape slightly to mould around the substrate as it binds",
+          "The active site is completely rigid and doesn't change shape",
+          "The substrate changes its chemical nature before colliding with the enzyme",
+          "Enzymes can only catalyze reversible reactions under the induced-fit model"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "How does a competitive inhibitor reduce the rate of an enzyme-controlled reaction?",
+        "Answers": [
+          "It has a similar shape to the substrate and binds to the active site, blocking substrate entry",
+          "It binds to an allosteric site, altering the shape of the active site permanently",
+          "It denatures the enzyme by breaking hydrogen bonds within the secondary structure",
+          "It lowers the activation energy required for the reaction to proceed"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which of the following is true regarding non-competitive inhibitors?",
+        "Answers": [
+          "They bind to a site other than the active site (allosteric site), changing the active site conformation",
+          "Their effects can be fully overcome by significantly increasing substrate concentration",
+          "They bind to the active site via strong covalent bonds",
+          "They increase the maximum rate of reaction"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which of the following nitrogenous bases is found in RNA but NOT in DNA?",
+        "Answers": ["Uracil", "Thymine", "Adenine", "Cytosine"],
+        "Correct": 1
+      },
+      {
+        "Question": "What type of bond links adjacent nucleotides together along a single strand of DNA?",
+        "Answers": ["Phosphodiester bond", "Hydrogen bond", "Peptide bond", "Glycosidic bond"],
+        "Correct": 1
+      },
+      {
+        "Question": "Which enzyme catalyzes the synthesis of new DNA strands by joining nucleotides together during replication?",
+        "Answers": ["DNA polymerase", "DNA helicase", "ATP synthase", "RNA primase"],
+        "Correct": 1
+      },
+      {
+        "Question": "What was the main conclusion of the Meselson-Stahl experiment?",
+        "Answers": [
+          "DNA replication occurs semi-conservatively",
+          "DNA replication occurs conservatively",
+          "DNA replication occurs dispersively",
+          "RNA acts as the primary genetic material in bacteria"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which enzyme catalyzes the hydrolysis of ATP into ADP and an inorganic phosphate group?",
+        "Answers": ["ATP hydrolase", "ATP synthase", "Phosphorylase", "Dehydrogenase"],
+        "Correct": 1
+      },
+      {
+        "Question": "Why does water have a relatively high specific heat capacity?",
+        "Answers": [
+          "Many hydrogen bonds between water molecules require significant energy to break",
+          "It contains many strong covalent bonds within each molecule",
+          "Water molecules are linear and pack tightly together",
+          "It is an inorganic molecule with low density"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the primary biological role of iron ions (Fe2+) in the human body?",
+        "Answers": [
+          "To act as a component of hemoglobin for oxygen transport",
+          "To maintain structural rigidity in bones",
+          "To co-transport glucose into epithelial cells",
+          "To regulate the pH of internal environments"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which ion is involved in the co-transport of glucose and amino acids across cell-surface membranes?",
+        "Answers": ["Sodium ions (Na+)", "Hydrogen ions (H+)", "Phosphate ions (PO43-)", "Calcium ions (Ca2+)"],
+        "Correct": 1
+      },
+      {
+        "Question": "What type of reaction breaks a chemical bond between two molecules using a water molecule?",
+        "Answers": ["Hydrolysis reaction", "Condensation reaction", "Oxidation reaction", "Reduction reaction"],
+        "Correct": 1
+      },
+      {
+        "Question": "Which organelle is surrounded by a double membrane containing pores and holds chromatin?",
+        "Answers": ["Nucleus", "Golgi apparatus", "Lysosome", "Smooth endoplasmic reticulum"],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the primary function of the rough endoplasmic reticulum (RER)?",
+        "Answers": [
+          "Folding and transport of proteins synthesized on attached ribosomes",
+          "Synthesis and transport of lipids and carbohydrates",
+          "Modification and packaging of glycoproteins",
+          "Aerobic respiration and ATP generation"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which organelle contains hydrolytic enzymes called lysozymes to break down old organelles or pathogens?",
+        "Answers": ["Lysosome", "Peroxisome", "Golgi vesicle", "Centriole"],
+        "Correct": 1
+      },
+      {
+        "Question": "What size of ribosomes are found in eukaryotic cytoplasm and chloroplasts/mitochondria respectively?",
+        "Answers": [
+          "80S in cytoplasm, 70S in organelles",
+          "70S in cytoplasm, 80S in organelles",
+          "80S in cytoplasm, 80S in organelles",
+          "70S in cytoplasm, 70S in organelles"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the composition of the cell wall in fungi?",
+        "Answers": ["Chitin", "Cellulose", "Murein (peptidoglycan)", "Glycoprotein"],
+        "Correct": 1
+      },
+      {
+        "Question": "Which of the following is a structural feature of a prokaryotic cell but NOT a eukaryotic cell?",
+        "Answers": ["Circular DNA free in the cytoplasm", "Plasma membrane", "Linear DNA bound to histones", "Mitochondria"],
+        "Correct": 1
+      },
+      {
+        "Question": "Which statement correctly describes viruses?",
+        "Answers": [
+          "They are acellular, non-living structures containing nucleic acid surrounded by a capsid",
+          "They are unicellular prokaryotic microorganisms",
+          "They contain 80S ribosomes for protein synthesis",
+          "They reproduce independently via binary fission"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "During cell fractionation, why must the tissue sample be kept in a cold, isotonic, and buffered solution?",
+        "Answers": [
+          "To reduce enzyme activity, prevent osmotic lysis/shrinking of organelles, and maintain constant pH",
+          "To accelerate enzyme actions, increase osmotic pressure, and alter pH",
+          "To denature destructive proteins, dissolve cell membranes, and act as a solvent",
+          "To stain the nuclei, supply nutrient glucose, and prevent crystal formation"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the correct order of organelle sedimentation during differential ultracentrifugation, from lowest speed to highest speed?",
+        "Answers": [
+          "Nuclei -> Mitochondria/Chloroplasts -> Lysosomes -> Ribosomes",
+          "Ribosomes -> Mitochondria -> Nuclei",
+          "Mitochondria -> Nuclei -> Ribosomes",
+          "Lysosomes -> Ribosomes -> Nuclei -> Mitochondria"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which type of microscope provides the highest maximum resolving power?",
+        "Answers": ["Transmission electron microscope (TEM)", "Light microscope", "Scanning electron microscope (SEM)", "Fluorescence optical microscope"],
+        "Correct": 1
+      },
+      {
+        "Question": "What is a main limitation of a Transmission Electron Microscope (TEM)?",
+        "Answers": [
+          "The specimen must be extremely thin and placed in a vacuum, meaning living specimens cannot be observed",
+          "It produces low-resolution 3D images",
+          "It uses text/html templates which limits magnification to 1500x",
+          "It can only be used to view whole, un-sectioned thick specimens"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "During which phase of the cell cycle does DNA replication occur?",
+        "Answers": ["S phase", "G1 phase", "G2 phase", "M phase (Mitosis)"],
+        "Correct": 1
+      },
+      {
+        "Question": "What occurs during the prophase stage of mitosis?",
+        "Answers": [
+          "Chromosomes condense and become visible; the nuclear envelope breaks down",
+          "Chromosomes line up along the equator of the cell",
+          "Centromeres split and sister chromatids move to opposite poles",
+          "Nuclear membranes reform around two distinct sets of chromosomes"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What event defines the metaphase stage of mitosis?",
+        "Answers": [
+          "Chromosomes align along the cell equator with spindle fibers attached to centromeres",
+          "Spindle fibers pull chromatids apart",
+          "Cytoplasm divides during cytokinesis",
+          "DNA uncoils into chromatin form"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What happens during anaphase of mitosis?",
+        "Answers": [
+          "Centromeres divide and sister chromatids are pulled to opposite poles by spindle fibers",
+          "The cytoplasm pinches to form two daughter cells",
+          "Nucleoli reappear inside new nuclei",
+          "The DNA replicates semi-conservatively"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "How do prokaryotic cells replicate?",
+        "Answers": ["Binary fission", "Mitosis", "Meiosis", "Budding"],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the function of cholesterol in the fluid mosaic model of cell membranes?",
+        "Answers": [
+          "To regulate membrane fluidity and add structural stability",
+          "To act as a water channel for osmosis",
+          "To bind to hormones as a cell receptor",
+          "To actively pump sodium ions across the membrane"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which statement describes facilitated diffusion?",
+        "Answers": [
+          "The passive movement of polar or charged molecules down a concentration gradient via channel or carrier proteins",
+          "The movement of molecules against a gradient via a carrier protein using ATP",
+          "The direct movement of small non-polar molecules through the lipid bilayer",
+          "The bulk movement of water from high to low solute concentration"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which transport mechanism utilizes an electrochemical gradient established by a primary active transport pump?",
+        "Answers": ["Co-transport", "Simple diffusion", "Osmosis", "Facilitated channel diffusion"],
+        "Correct": 1
+      },
+      {
+        "Question": "What defines an antigen?",
+        "Answers": [
+          "A protein or glycoprotein molecule on a cell surface that triggers an immune response",
+          "A phagocytic cell that engulfs bacteria",
+          "A specialized protein secreted by B cells to neutralize toxins",
+          "A non-specific chemical barrier found in tears"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the role of a phagosome during phagocytosis?",
+        "Answers": [
+          "It is the vesicle formed around an engulfed pathogen before it fuses with a lysosome",
+          "It secretes antibodies into the blood",
+          "It presents antigens to cytotoxic T cells",
+          "It synthesizes lysozymes inside the cytoplasm"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Where do T-lymphocytes mature in the human body?",
+        "Answers": ["Thymus gland", "Bone marrow", "Spleen", "Lymph nodes"],
+        "Correct": 1
+      },
+      {
+        "Question": "Which cell type secretes large quantities of monoclonal antibodies during the humoral response?",
+        "Answers": ["Plasma B cells", "Helper T cells", "Cytotoxic T cells", "Macrophages"],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the structural basis for antibody specificity?",
+        "Answers": [
+          "The highly specific primary and tertiary structure of the variable region",
+          "The constant region sequence of the heavy chain",
+          "The presence of disulfide bonds linking the light chains",
+          "The attachment of a specific carbohydrate anchor"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "How do antibodies help clear infection via agglutination?",
+        "Answers": [
+          "They bind to multiple pathogens simultaneously, clumping them together for easier phagocytosis",
+          "They punch holes in bacterial cell walls causing lysis",
+          "They act as enzymes to digest viral capsids",
+          "They block the entry of minerals into the bacterial cytoplasm"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What happens to the surface area to volume ratio as an organism increases in size?",
+        "Answers": ["It decreases", "It increases exponentially", "It stays exactly the same", "It fluctuates depending on shape"],
+        "Correct": 1
+      },
+      {
+        "Question": "How do insects minimize water loss while allowing gas exchange?",
+        "Answers": [
+          "They possess a waterproof chitinous exoskeleton and can close their spiracles",
+          "They maintain a totally permeable body surface",
+          "They actively excrete water across their trachea",
+          "They have open circulatory networks with no gas barrier"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "How does the counter-current exchange system maximize gas exchange efficiency in fish gills?",
+        "Answers": [
+          "Blood and water flow in opposite directions, maintaining a steep diffusion gradient along the entire length of the lamellae",
+          "Blood and water flow in the same direction to balance out concentrations quickly",
+          "It forces water to move faster than blood, increasing kinetic collision rates",
+          "It increases the temperature of incoming water to raise diffusion rates"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Through which structures does gas exchange predominantly occur in dicotyledonous plant leaves?",
+        "Answers": ["Stomata located mainly in the lower epidermis", "Waxy cuticle layer", "Xylem vessels", "Sieve tube elements"],
+        "Correct": 1
+      },
+      {
+        "Question": "Which of the following is a structural adaptation of a xerophytic plant to reduce transpiration?",
+        "Answers": [
+          "Sunken stomata or rolled leaves that trap moist air, reducing the water vapor potential gradient",
+          "Broad leaves with a very thin cuticle",
+          "Increased stomatal density across the upper leaf surface",
+          "Complete absence of an epidermal layer"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What structural pathway provides a short diffusion pathway for gases in the human lungs?",
+        "Answers": [
+          "Single layers of squamous epithelial cells in both the alveolar wall and capillary wall",
+          "Thick smooth muscle layers around the bronchi",
+          "Ciliated epithelial cells in the trachea",
+          "Cartilage rings embedded in the bronchioles"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which muscular changes cause inspiration in a human?",
+        "Answers": [
+          "External intercostal muscles contract and diaphragm contracts (flattens), increasing thoracic volume",
+          "Internal intercostal muscles contract, diaphragm relaxes and domes",
+          "Both internal and external intercostal muscles relax completely",
+          "Abdominal muscles compress the ribcage downward"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What formula is used to calculate Pulmonary Ventilation Rate (PVR)?",
+        "Answers": [
+          "PVR = Tidal Volume x Breathing Rate",
+          "PVR = Tidal Volume + Ventilation Rate",
+          "PVR = Cardiac Output / Stroke Volume",
+          "PVR = Oxygen Consumption Rate x Heart Rate"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which enzyme is responsible for breaking down starch into maltose in the human digestive system?",
+        "Answers": ["Amylase", "Maltase", "Protease", "Lipase"],
+        "Correct": 1
+      },
+      {
+        "Question": "Where are membrane-bound disaccharidases (like maltase, lactase, sucrase) located?",
+        "Answers": [
+          "In the brush border membrane of epithelial cells in the ileum",
+          "In the gastric juice of the stomach",
+          "Inside the secretory vesicles of the pancreas",
+          "Within the saliva produced by sublingual glands"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the function of endopeptidases in protein digestion?",
+        "Answers": [
+          "They hydrolyze internal peptide bonds within a polypeptide chain, creating more ends for exopeptidases",
+          "They hydrolyze peptide bonds at the terminal ends of a polypeptide chain",
+          "They break dipeptides into single amino acids",
+          "They synthesize peptide chains from free amines"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the role of bile salts in lipid digestion?",
+        "Answers": [
+          "They emulsify large lipid droplets into smaller droplets, increasing the surface area for lipase action",
+          "They chemically hydrolyze triglycerides into glycerol and fatty acids",
+          "They lower the pH of the small intestine to activate pepsin",
+          "They actively transport chylomicrons into the lacteals"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What tiny structures are formed by fatty acids, monoglycerides, and bile salts to carry lipid breakdown products to the ileum epithelial cell surface?",
+        "Answers": ["Micelles", "Chylomicrons", "Liposomes", "Ribosomes"],
+        "Correct": 1
+      },
+      {
+        "Question": "Which structural feature describes the quaternary structure of human hemoglobin?",
+        "Answers": [
+          "Four polypeptide chains, each associated with an iron-containing heme prosthetic group",
+          "A single linear polypeptide chain containing one iron ion",
+          "Two parallel RNA helices cross-linked by sulfur bridges",
+          "A globular lipid complex wrapped around a fibrous central core"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is meant by the term 'cooperative binding' in relation to hemoglobin?",
+        "Answers": [
+          "The binding of the first oxygen molecule alters the hemoglobin tertiary shape, making it easier for subsequent oxygen molecules to bind",
+          "Hemoglobin requires carbon dioxide to bind oxygen molecules",
+          "All four oxygen molecules must bind at exactly the same microsecond",
+          "Hemoglobin binds to plasma proteins to stay stable"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the Bohr effect?",
+        "Answers": [
+          "High partial pressure of carbon dioxide causes a reduction in hemoglobin's affinity for oxygen, shifting the dissociation curve to the right",
+          "High oxygen levels cause hemoglobin to bind carbon dioxide tighter",
+          "Low temperatures cause hemoglobin to change into a fibrous structural protein",
+          "An increase in pH increases the unloading of oxygen at active tissues"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Why do active organisms living in low-oxygen environments (e.g., earthworms or llamas) possess hemoglobin with a high oxygen affinity?",
+        "Answers": [
+          "To enable hemoglobin to become fully saturated with oxygen even at low partial pressures of oxygen in their environment",
+          "To allow rapid unloading of oxygen at low temperatures",
+          "To prevent carbon dioxide from entering the bloodstream",
+          "To completely eliminate the need for a circulatory network"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which blood vessel carries oxygenated blood from the lungs back to the left atrium of the heart?",
+        "Answers": ["Pulmonary vein", "Pulmonary artery", "Aorta", "Vena cava"],
+        "Correct": 1
+      },
+      {
+        "Question": "Which structural characteristic allows arteries to withstand and maintain high blood pressure?",
+        "Answers": [
+          "A thick muscle layer and a thick elastic layer that can stretch and recoil",
+          "A wide lumen and many internal valves",
+          "Walls consisting of a single layer of endothelial cells",
+          "An entirely rigid outer lining made of murein"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What causes the formation of tissue fluid at the arterial end of a capillary bed?",
+        "Answers": [
+          "High hydrostatic pressure inside the capillary exceeds the opposing osmotic pressure, forcing fluid out through gaps",
+          "High osmotic pressure pulling water out of the vessel",
+          "Active transport of plasma proteins into intercellular spaces",
+          "The closing of venous valves downstream"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "During which phase of the cardiac cycle do the ventricles contract, raising pressure and forcing the semi-lunar valves open?",
+        "Answers": ["Ventricular systole", "Atrial systole", "Diastole", "Isovolumetric relaxation"],
+        "Correct": 1
+      },
+      {
+        "Question": "What theory explains the movement of water up through xylem vessels in plants?",
+        "Answers": ["Cohesion-tension theory", "Mass flow hypothesis", "Lock and key theory", "Active root pressure mechanism"],
+        "Correct": 1
+      },
+      {
+        "Question": "Which properties of water are fundamental to the cohesion-tension theory?",
+        "Answers": [
+          "Cohesion between water molecules via hydrogen bonds and adhesion to the xylem walls",
+          "Low boiling point and high volatility",
+          "High concentration of dissolved sucrose raising osmotic drive",
+          "Hydrophobic interactions with the lipid lining of tracking"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "According to the mass flow hypothesis, how is sucrose loaded into phloem sieve tube elements at the source?",
+        "Answers": [
+          "Active co-transport with hydrogen ions (H+) into companion cells, followed by diffusion into sieve tubes via plasmodesmata",
+          "Simple diffusion through large stomatal openings",
+          "Bulk endocytosis across the waxy cuticle",
+          "Passive filtration driven by transpiration pull"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What experimental evidence supports the translocation of organic solutes through phloem rather than xylem?",
+        "Answers": [
+          "Ringing experiments showing a swelling above a removed ring of bark containing phloem, and tracer experiments using radioactive carbon-14",
+          "Measuring the rate of water entry through root hair cells",
+          "Observing the opening of stomata under a light microscope",
+          "Using a potometer to measure bubble movement in a leafy shoot"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is meant by the genetic code being described as 'degenerate'?",
+        "Answers": [
+          "More than one triplet codon can code for the same amino acid",
+          "Some codons do not code for any amino acids",
+          "The same underlying code is shared by all living organisms on Earth",
+          "Each base is read exactly twice during transcription"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What does it mean that the genetic code is 'non-overlapping'?",
+        "Answers": [
+          "Each base in a sequence is read only once as part of a single triplet codon",
+          "Introns are removed before translation starts",
+          "Genes cannot reside on the same chromosome",
+          "Translation and transcription happen in the same cell compartment"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is a major structural difference between eukaryotic DNA and prokaryotic DNA?",
+        "Answers": [
+          "Eukaryotic DNA is linear and associated with histone proteins; prokaryotic DNA is circular and lacks histones",
+          "Eukaryotic DNA is circular, whereas prokaryotic DNA is linear",
+          "Eukaryotic DNA contains uracil instead of thymine",
+          "Prokaryotic DNA contains introns that must be spliced out"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is an intron?",
+        "Answers": [
+          "A non-coding sequence of DNA found within a eukaryotic gene",
+          "A sequence of bases that codes for a specific functional enzyme",
+          "The binding site for RNA polymerase",
+          "The structural loop found on a tRNA molecule"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which process involves copying a gene's DNA sequence into a complementary pre-mRNA molecule?",
+        "Answers": ["Transcription", "Translation", "Replication", "Splicing"],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the function of RNA polymerase during transcription?",
+        "Answers": [
+          "Joining complementary RNA nucleotides together by forming phosphodiester bonds",
+          "Unwinding the double helix by breaking hydrogen bonds",
+          "Splicing out exons from the primary transcript",
+          "Attaching amino acids to their respective tRNA molecules"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Why is splicing necessary in the production of functional mRNA in eukaryotes?",
+        "Answers": [
+          "To remove non-coding introns and join coding exons together",
+          "To add a poly-A tail to prevent breakdown",
+          "To convert the single strand into a double helix",
+          "To move the mRNA from the ribosome to the cytoplasm"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the role of tRNA during the translation stage of protein synthesis?",
+        "Answers": [
+          "It brings specific amino acids to the ribosome and matches its anticodon to the complementary mRNA codon",
+          "It carries the primary genetic code from the nucleus to the cytoplasm",
+          "It catalyzes the formation of peptide bonds inside the nucleolus",
+          "It splices out non-coding sequences from mature mRNA"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What type of mutation results from the insertion or deletion of a single nucleotide base, altering all subsequent downstream triplet codons?",
+        "Answers": ["Frameshift mutation", "Silent mutation", "Substitution mutation", "Inversion mutation"],
+        "Correct": 1
+      },
+      {
+        "Question": "How many nuclear divisions occur during meiosis, and what type of cells are produced?",
+        "Answers": [
+          "Two divisions, producing four genetically varied haploid gametes",
+          "One division, producing two identical diploid body cells",
+          "Two divisions, producing four identical diploid clones",
+          "One division, producing four non-living viral capsids"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which two processes during meiosis generate genetic variation?",
+        "Answers": [
+          "Crossing over between homologous chromosomes and independent segregation of chromosomes",
+          "DNA replication and cytokinesis",
+          "Splicing and transcription factor activation",
+          "Binary fission and co-transport"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is a chromosome non-disjunction mutation?",
+        "Answers": [
+          "When chromosomes or sister chromatids fail to separate properly during meiosis, leading to gametes with abnormal chromosome numbers",
+          "A base substitution that alters a single amino acid",
+          "The loss of a telomere cap during mitosis",
+          "The accidental splicing of structural exons"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the definition of genetic diversity?",
+        "Answers": [
+          "The total number of different alleles in a population's gene pool",
+          "The total number of different species in a given geographical ecosystem",
+          "The variation in structural phenotypes across different phyla",
+          "The rate of spontaneous base mutations per hour"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Which type of natural selection favors individuals at one extreme of a phenotypic range, shifting the mean characteristic over time?",
+        "Answers": ["Directional selection", "Stabilising selection", "Disruptive selection", "Artificial selection"],
+        "Correct": 1
+      },
+      {
+        "Question": "What type of selection is demonstrated when human birth weights are maintained around an optimal intermediate value because very low or very high weights reduce survival?",
+        "Answers": ["Stabilising selection", "Directional selection", "Disruptive selection", "Sexual selection"],
+        "Correct": 1
+      },
+      {
+        "Question": "What basic criteria must two organisms meet to be classified as members of the same species?",
+        "Answers": [
+          "They must be able to breed together to produce fertile offspring",
+          "They must have identical physical dimensions and color patterns",
+          "They must occupy the exact same niche in a food chain",
+          "They must share 100% identical non-coding intron patterns"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Why is courtship behavior an evolutionary advantage?",
+        "Answers": [
+          "It allows individuals to recognize members of their own species, synchronize mating, and identify a fertile partner",
+          "It ensures individuals can locate food resources collectively",
+          "It induces directional mutations in the gametes",
+          "It prevents the formation of an active immune response against the partner"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What does a phylogenetic classification system represent?",
+        "Answers": [
+          "The evolutionary relationships between organisms based on shared ancestry and genetic similarities",
+          "An arrangement of organisms based purely on alphabetical order",
+          "A grouping based entirely on the external analogous structures of organisms",
+          "The geographical distribution of species across different climates"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the correct sequence of taxonomic groups in the classification hierarchy, from largest to smallest?",
+        "Answers": [
+          "Domain -> Kingdom -> Phylum -> Class -> Order -> Family -> Genus -> Species",
+          "Kingdom -> Phylum -> Class -> Order -> Family -> Genus -> Species",
+          "Species -> Genus -> Family -> Order -> Class -> Phylum -> Kingdom",
+          "Domain -> Phylum -> Order -> Class -> Family -> Genus -> Species"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What two parameters are required to calculate Simpson's Index of Diversity (d)?",
+        "Answers": [
+          "The total number of organisms of all species (N) and the total number of organisms of each individual species (n)",
+          "The total surface area of the habitat and the number of clear boundaries",
+          "The mean birth rate and the mean mutation frequency",
+          "The percentage of canopy cover and the annual soil rainfall volume"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What does a high value for Simpson's Index of Diversity indicate about a habitat?",
+        "Answers": [
+          "The habitat is stable and diverse; a change in one factor is less likely to destroy the whole ecosystem",
+          "The habitat is highly unstable and dominated by a single aggressive species",
+          "Species richness is exceptionally low",
+          "The area has been completely cleared by human agricultural practices"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "How does intense monoculture farming affect species diversity in an agricultural area?",
+        "Answers": [
+          "It reduces species diversity by clearing varied native plants and using pesticides, leaving few niches",
+          "It significantly increases biodiversity by introducing new alleles",
+          "It has no measurable impact on the surrounding natural ecosystem",
+          "It maximizes Simpson's index of diversity naturally"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What can be compared between different organisms to clarify their evolutionary relationships?",
+        "Answers": [
+          "The exact base sequence of DNA, mRNA, or the amino acid sequence of a shared protein (like cytochrome c)",
+          "The size of their largest body cells under a light microscope",
+          "The rate of active transport inside their root cells",
+          "The absolute volume of tissue fluid produced per hour"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "Why is it important to select sampling sites randomly when investigating the diversity of organisms in a field?",
+        "Answers": [
+          "To avoid investigator bias and ensure the collected data is representative of the whole habitat",
+          "To ensure the sampling is deliberately biased toward rare species",
+          "To minimize the time spent counting small plants",
+          "To ensure that only the center of the field is analyzed"
+        ],
+        "Correct": 1
+      },
+      {
+        "Question": "What is the purpose of calculating a standard deviation for a set of biological experimental data?",
+        "Answers": [
+          "To measure the spread of data around the mean value, indicating the reliability and variation of the data",
+          "To calculate the absolute true maximum of a sample population",
+          "To automatically eliminate anomalous measurements without checking",
+          "To prove that two means are 100% identical with no margin of error"
+        ],
+        "Correct": 1
+      }
+    ];
+
+    // Shuffle helper
+    const shuffleArray = (array) => {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    };
+
+    // --- SOUND GENERATOR WITH WEB AUDIO API ---
+    const playSound = (type) => {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        if (type === 'correct') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+          gain.gain.setValueAtTime(0.15, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.4);
+        } else if (type === 'wrong') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.4);
+        } else if (type === 'tick') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1200, ctx.currentTime);
+          gain.gain.setValueAtTime(0.05, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.06);
+        } else if (type === 'gameover') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.8);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+          osc.start();
+          osc.stop(ctx.currentTime + 1.0);
+        }
+      } catch (e) {
+        // Fallback gracefully if blocked by browser autoplay settings
+      }
+    };
+
+    function App() {
+      const [gameState, setGameState] = useState('welcome');
+      const [studentName, setStudentName] = useState('');
+      const [currentStreak, setCurrentStreak] = useState(0);
+      const [highScore, setHighScore] = useState(0);
+      
+      const [shuffledQueue, setShuffledQueue] = useState([]);
+      const [currentIndex, setCurrentIndex] = useState(0);
+      const [currentQuestion, setCurrentQuestion] = useState(null);
+      const [shuffledOptions, setShuffledOptions] = useState([]);
+      const [correctOptionIndex, setCorrectOptionIndex] = useState(-1);
+      
+      const [timeLeft, setTimeLeft] = useState(20);
+      const [soundEnabled, setSoundEnabled] = useState(true);
+      
+      const [selectedAnswerIndex, setSelectedAnswerIndex] = useState(null);
+      const [wrongTrigger, setWrongTrigger] = useState(false);
+      const [correctTrigger, setCorrectTrigger] = useState(false);
+      
+      const [leaderboard, setLeaderboard] = useState([]);
+      const [isUploading, setIsUploading] = useState(false);
+      const [user, setUser] = useState(null);
+      const [showRuleModal, setShowRuleModal] = useState(false);
+      
+      // Database Config Panel States
+      const [showConfigModal, setShowConfigModal] = useState(false);
+      const [dbConfigJson, setDbConfigJson] = useState('');
+      const [dbStatus, setDbStatus] = useState('local'); // 'local' or 'connected'
+      const [firebaseInstance, setFirebaseInstance] = useState(null);
+
+      const timerRef = useRef(null);
+      const databaseUnsubscribe = useRef(null);
+
+      // Unique App ID for Rules
+      const appId = 'aqa-as-biology-streak';
+
+      // --- 1. FIRESTORE DATABASE INITIALIZATION ENGINE ---
+      const initFirebase = async (customConfigObj = null) => {
+        // Turn off any active listeners
+        if (databaseUnsubscribe.current) {
+          databaseUnsubscribe.current();
+          databaseUnsubscribe.current = null;
+        }
+
+        let activeConfig = null;
+
+        // Priority 1: Direct configuration passed from settings modal
+        if (customConfigObj) {
+          activeConfig = customConfigObj;
+        }
+        // Priority 2: Config variables injected inside the Sandbox environment
+        else if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+          try {
+            activeConfig = JSON.parse(__firebase_config);
+          } catch (e) {
+            console.error("Failed to parse sandbox firebase configuration.", e);
+          }
+        }
+        // Priority 3: Custom cached configuration saved inside localStorage from previous session
+        else {
+          const cached = localStorage.getItem('as_biology_custom_firebase_config');
+          if (cached) {
+            try {
+              activeConfig = JSON.parse(cached);
+              setDbConfigJson(JSON.stringify(activeConfig, null, 2));
+            } catch (e) {}
+          }
+        }
+
+        if (!activeConfig) {
+          setDbStatus('local');
+          setFirebaseInstance(null);
+          loadLocalLeaderboard();
+          return;
+        }
+
+        try {
+          // Initialize Firebase App
+          let appInstance;
+          if (firebase.apps.length > 0) {
+            appInstance = firebase.apps[0];
+          } else {
+            appInstance = firebase.initializeApp(activeConfig);
+          }
+
+          const activeAuth = firebase.auth(appInstance);
+          const activeDb = firebase.firestore(appInstance);
+
+          // Authenticate BEFORE query (Rule 3)
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await activeAuth.signInWithCustomToken(__initial_auth_token);
+          } else {
+            await activeAuth.signInAnonymously();
+          }
+
+          setFirebaseInstance({ db: activeDb, auth: activeAuth });
+          setDbStatus('connected');
+
+          // Establish active sync listener on high score collection (Rule 1 & Rule 2)
+          const publicDataCollection = activeDb.collection('artifacts').doc(appId).collection('public').doc('data').collection('scores');
+          
+          databaseUnsubscribe.current = publicDataCollection.onSnapshot((snapshot) => {
+            const rawData = [];
+            snapshot.forEach((doc) => {
+              rawData.push({ id: doc.id, ...doc.data() });
+            });
+            
+            // In-Memory sorting to ensure zero complex database index compilation issues (Rule 2)
+            const sortedData = rawData
+              .sort((a, b) => b.score - a.score || b.timestamp - a.timestamp)
+              .slice(0, 15);
+
+            setLeaderboard(sortedData);
+            localStorage.setItem('as_biology_leaderboard', JSON.stringify(sortedData));
+          }, (error) => {
+            console.error("Database subscription failure. Reverting to local fallback.", error);
+            setDbStatus('local');
+          });
+
+        } catch (error) {
+          console.error("Firebase initialization failed:", error);
+          setDbStatus('local');
+          loadLocalLeaderboard();
+        }
+      };
+
+      // Run initial check on load
+      useEffect(() => {
+        initFirebase();
+        return () => {
+          if (databaseUnsubscribe.current) databaseUnsubscribe.current();
+        };
+      }, []);
+
+      // Fallback helper to load scores locally
+      const loadLocalLeaderboard = () => {
+        const fallbackLocal = localStorage.getItem('as_biology_leaderboard');
+        if (fallbackLocal) {
+          try {
+            setLeaderboard(JSON.parse(fallbackLocal));
+          } catch(e) {}
+        }
+      };
+
+      // Load high score from local storage
+      useEffect(() => {
+        const savedHighScore = localStorage.getItem('as_biology_high_score');
+        if (savedHighScore) {
+          setHighScore(parseInt(savedHighScore, 10));
+        }
+      }, []);
+
+      // Save custom pasted credentials from settings panel
+      const saveCustomDatabaseConfig = () => {
+        try {
+          const parsed = JSON.parse(dbConfigJson);
+          localStorage.setItem('as_biology_custom_firebase_config', JSON.stringify(parsed));
+          initFirebase(parsed);
+          setShowConfigModal(false);
+        } catch (e) {
+          alert("Invalid JSON format! Please double-check your pasted Firebase Config object keys.");
+        }
+      };
+
+      // Reset custom credentials and return back to local-only
+      const clearCustomDatabaseConfig = () => {
+        localStorage.removeItem('as_biology_custom_firebase_config');
+        setDbConfigJson('');
+        initFirebase(null);
+        setShowConfigModal(false);
+      };
+
+      // --- 2. QUESTION CONTROL AND TIMING ENGINE ---
+      const startNewGame = () => {
+        if (!studentName.trim()) return;
+        
+        setCurrentStreak(0);
+        setSelectedAnswerIndex(null);
+        setWrongTrigger(false);
+        setCorrectTrigger(false);
+        
+        const freshQueue = shuffleArray(QUESTIONS);
+        setShuffledQueue(freshQueue);
+        setCurrentIndex(0);
+        
+        setGameState('playing');
+        loadQuestion(freshQueue[0]);
+      };
+
+      const loadQuestion = (questionObj) => {
+        if (!questionObj) return;
+        
+        const originalAnswers = questionObj.Answers;
+        const indexedAnswers = originalAnswers.map((ans, idx) => ({ text: ans, originalIndex: idx }));
+        const shuffled = shuffleArray(indexedAnswers);
+        
+        const correctIdx = shuffled.findIndex(item => item.originalIndex === 0);
+        
+        setShuffledOptions(shuffled.map(item => item.text));
+        setCorrectOptionIndex(correctIdx);
+        setCurrentQuestion(questionObj);
+        setSelectedAnswerIndex(null);
+        setWrongTrigger(false);
+        setCorrectTrigger(false);
+        setTimeLeft(20);
+      };
+
+      // 20-second active timer
+      useEffect(() => {
+        if (gameState !== 'playing') return;
+
+        timerRef.current = setInterval(() => {
+          setTimeLeft((prev) => {
+            if (prev <= 1) {
+              clearInterval(timerRef.current);
+              handleTimeout();
+              return 0;
+            }
+            if (soundEnabled && prev <= 6) {
+              playSound('tick');
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
+        return () => clearInterval(timerRef.current);
+      }, [gameState, currentQuestion, soundEnabled]);
+
+      const handleTimeout = () => {
+        if (soundEnabled) playSound('wrong');
+        setWrongTrigger(true);
+        triggerGameOver();
+      };
+
+      const handleSelectAnswer = (idx) => {
+        if (selectedAnswerIndex !== null || gameState !== 'playing') return;
+        
+        clearInterval(timerRef.current);
+        setSelectedAnswerIndex(idx);
+
+        if (idx === correctOptionIndex) {
+          if (soundEnabled) playSound('correct');
+          setCorrectTrigger(true);
+          const nextStreak = currentStreak + 1;
+          setCurrentStreak(nextStreak);
+          
+          if (nextStreak > highScore) {
+            setHighScore(nextStreak);
+            localStorage.setItem('as_biology_high_score', nextStreak.toString());
+          }
+
+          setTimeout(() => {
+            const nextIndex = currentIndex + 1;
+            let nextQueue = shuffledQueue;
+            let actualNextIndex = nextIndex;
+            if (nextIndex >= shuffledQueue.length) {
+              nextQueue = shuffleArray(QUESTIONS);
+              setShuffledQueue(nextQueue);
+              actualNextIndex = 0;
+            }
+            
+            setCurrentIndex(actualNextIndex);
+            loadQuestion(nextQueue[actualNextIndex]);
+          }, 550);
+        } else {
+          if (soundEnabled) playSound('wrong');
+          setWrongTrigger(true);
+          setTimeout(() => {
+            triggerGameOver();
+          }, 900);
+        }
+      };
+
+      const triggerGameOver = () => {
+        clearInterval(timerRef.current);
+        if (soundEnabled) playSound('gameover');
+        setGameState('gameover');
+        
+        uploadScoreToCloud(studentName, currentStreak);
+      };
+
+      const uploadScoreToCloud = async (name, score) => {
+        if (score === 0) return;
+        setIsUploading(true);
+
+        const scoreData = {
+          name: name.trim().substring(0, 20),
+          score: score,
+          timestamp: Date.now(),
+          userId: firebaseInstance?.auth?.currentUser?.uid || 'anonymous'
+        };
+
+        if (dbStatus === 'connected' && firebaseInstance) {
+          try {
+            const publicDataCollection = firebaseInstance.db.collection('artifacts').doc(appId).collection('public').doc('data').collection('scores');
+            await publicDataCollection.add(scoreData);
+          } catch (e) {
+            console.error("Direct score upload failed. Saving as local backup.", e);
+            saveFallbackScore(scoreData);
+          }
+        } else {
+          saveFallbackScore(scoreData);
+        }
+        setIsUploading(false);
+      };
+
+      const saveFallbackScore = (scoreData) => {
+        try {
+          const localStr = localStorage.getItem('as_biology_leaderboard') || '[]';
+          const localList = JSON.parse(localStr);
+          localList.push({ id: Math.random().toString(), ...scoreData });
+          const sorted = localList.sort((a, b) => b.score - a.score).slice(0, 15);
+          setLeaderboard(sorted);
+          localStorage.setItem('as_biology_leaderboard', JSON.stringify(sorted));
+        } catch(err) {
+          console.warn("Storage write failed.", err);
+        }
+      };
+
+      return (
+        <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between font-sans selection:bg-amber-500 selection:text-slate-900">
+          
+          {/* HEADER BAR */}
+          <header className="bg-slate-950/80 backdrop-blur border-b border-slate-800 sticky top-0 z-40 transition-all">
+            <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+              
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/10">
+                  <BookOpenIcon className="w-6 h-6 text-slate-950 stroke-[2.5]" />
+                </div>
+                <div>
+                  <h1 className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500 bg-clip-text text-transparent">
+                    AQA Biology Streak
+                  </h1>
+                  <p className="text-xs text-slate-400 font-medium">AS-Level Revision Arena</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                {/* Database Connectivity Indicator */}
+                <button
+                  onClick={() => setShowConfigModal(true)}
+                  className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-bold transition ${
+                    dbStatus === 'connected' 
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20' 
+                      : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
+                  }`}
+                  title={dbStatus === 'connected' ? "Connected to Cloud Database" : "Using local leaderboard. Click to configure cloud sync."}
+                >
+                  <span className={`w-2 h-2 rounded-full ${dbStatus === 'connected' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400 animate-pulse'}`} />
+                  <span className="hidden sm:inline">{dbStatus === 'connected' ? 'Cloud Synced' : 'Local Only'}</span>
+                  <SettingsIcon className="w-3.5 h-3.5 ml-0.5" />
+                </button>
+
+                {/* Audio Toggle */}
+                <button 
+                  onClick={() => setSoundEnabled(!soundEnabled)} 
+                  className={`p-2 rounded-lg border transition ${soundEnabled ? 'bg-slate-800/80 border-amber-500/30 text-amber-400 hover:bg-slate-700' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-400'}`}
+                  title={soundEnabled ? "Mute audio cues" : "Unmute audio cues"}
+                >
+                  {soundEnabled ? <Volume2Icon className="w-4 h-4" /> : <VolumeXIcon className="w-4 h-4" />}
+                </button>
+
+                {/* Rules Button */}
+                <button 
+                  onClick={() => setShowRuleModal(true)} 
+                  className="px-3 py-1.5 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 rounded-lg transition"
+                >
+                  How to Play
+                </button>
+              </div>
+
+            </div>
+          </header>
+
+          {/* MAIN INTERFACE WRAPPER */}
+          <main className="flex-grow flex items-center justify-center p-4 max-w-4xl w-full mx-auto">
+            
+            {/* WELCOME VIEW */}
+            {gameState === 'welcome' && (
+              <div className="w-full max-w-md bg-slate-950/40 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md animate-fade-in">
+                {/* Ambient Decorative Lighting */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="text-center mb-8 relative">
+                  <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold mb-4 uppercase tracking-widest">
+                    <SparklesIcon className="w-3.5 h-3.5" />
+                    <span>100 Premium Questions</span>
+                  </span>
+                  <h2 className="text-3xl font-black text-white tracking-tight leading-tight">
+                    Can You Survive <br/>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">The Ultimate Streak?</span>
+                  </h2>
+                  <p className="text-slate-400 text-sm mt-3 leading-relaxed">
+                    Test your deep knowledge of AQA AS-Level Biology. Zero tolerance. One single mistake or timeout instantly breaks your streak.
+                  </p>
+                </div>
+
+                <form onSubmit={(e) => { e.preventDefault(); startNewGame(); }} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                      Student Name
+                    </label>
+                    <div className="relative">
+                      <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500">
+                        <UserIcon className="w-4 h-4" />
+                      </span>
+                      <input
+                        type="text"
+                        required
+                        maxLength={20}
+                        value={studentName}
+                        onChange={(e) => setStudentName(e.target.value)}
+                        placeholder="Enter name to record score..."
+                        className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/80 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold rounded-xl py-3.5 px-4 shadow-lg shadow-amber-500/20 active:translate-y-[1px] transition flex items-center justify-center space-x-2 text-base"
+                  >
+                    <PlayIcon className="w-5 h-5 fill-current" />
+                    <span>Begin Challenge</span>
+                  </button>
+                </form>
+
+                <div className="mt-8 pt-6 border-t border-slate-900/60 flex items-center justify-between text-xs text-slate-500">
+                  <span className="flex items-center space-x-1.5">
+                    <ClockIcon className="w-3.5 h-3.5 text-amber-500/70" />
+                    <span>20s timer per question</span>
+                  </span>
+                  <span className="flex items-center space-x-1.5">
+                    <TrophyIcon className="w-3.5 h-3.5 text-amber-500/70" />
+                    <span>Your High Score: {highScore}</span>
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* ACTIVE QUESTION GAMEPLAY */}
+            {gameState === 'playing' && currentQuestion && (
+              <div className="w-full max-w-2xl bg-slate-950/40 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md animate-fade-in">
+                
+                {/* STREAK & TIMER HEADER */}
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800/60">
+                  {/* STREAK FLAG */}
+                  <div className="flex items-center space-x-2.5">
+                    <div className="px-3.5 py-1.5 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center space-x-1.5">
+                      <FlameIcon className="w-4.5 h-4.5 text-amber-500 animate-pulse fill-current" />
+                      <span className="text-sm font-extrabold tracking-wide">STREAK: {currentStreak}</span>
+                    </div>
+                    {highScore > 0 && (
+                      <span className="text-xs text-slate-500 font-semibold hidden sm:inline">
+                        Best Run: {highScore}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* TIMER COUNTDOWN */}
+                  <div className="flex items-center space-x-2">
+                    <div className="relative w-10 h-10 flex items-center justify-center">
+                      <svg className="absolute inset-0 w-full h-full -rotate-90">
+                        <circle
+                          cx="20"
+                          cy="20"
+                          r="16"
+                          className="stroke-slate-800 fill-none"
+                          strokeWidth="3.5"
+                        />
+                        <circle
+                          cx="20"
+                          cy="20"
+                          r="16"
+                          className={`fill-none transition-all duration-1000 ${
+                            timeLeft <= 5 
+                              ? 'stroke-red-500 drop-shadow-[0_0_4px_rgba(239,68,68,0.5)]' 
+                              : timeLeft <= 10 
+                              ? 'stroke-amber-400' 
+                              : 'stroke-emerald-400'
+                          }`}
+                          strokeWidth="3.5"
+                          strokeDasharray="100.5"
+                          strokeDashoffset={100.5 - (timeLeft / 20) * 100.5}
+                        />
+                      </svg>
+                      <span className={`text-xs font-black transition-all ${
+                        timeLeft <= 5 ? 'text-red-500 scale-110' : 'text-slate-300'
+                      }`}>
+                        {timeLeft}s
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* STREAK FIRE NOTIFIER */}
+                {currentStreak > 0 && currentStreak % 5 === 0 && !selectedAnswerIndex && (
+                  <div className="mb-4 text-center py-2 bg-gradient-to-r from-amber-500/10 via-amber-500/20 to-amber-500/10 border-y border-amber-500/20 rounded-lg animate-bounce">
+                    <span className="text-xs font-black text-amber-400 uppercase tracking-widest flex items-center justify-center space-x-1.5">
+                      <SparklesIcon className="w-3.5 h-3.5" />
+                      <span>On Fire! {currentStreak} in a row!</span>
+                      <SparklesIcon className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
+                )}
+
+                {/* THE QUESTION */}
+                <div className="mb-8 min-h-[5rem] flex flex-col justify-center">
+                  <span className="text-xs font-bold text-amber-500/70 uppercase tracking-widest mb-1.5 block">
+                    Question {currentIndex + 1}
+                  </span>
+                  <h3 className="text-lg sm:text-xl font-bold text-white leading-relaxed">
+                    {currentQuestion.Question}
+                  </h3>
+                </div>
+
+                {/* ANSWERS (NEVER REVEALS IN CASE OF ERROR) */}
+                <div className="space-y-3.5">
+                  {shuffledOptions.map((option, idx) => {
+                    const isSelected = selectedAnswerIndex === idx;
+                    const isCorrect = idx === correctOptionIndex;
+                    
+                    let btnStyle = "bg-slate-900/60 border-slate-800 hover:bg-slate-800/50 hover:border-slate-700 text-slate-200";
+                    
+                    if (selectedAnswerIndex !== null) {
+                      if (isSelected && isCorrect) {
+                        btnStyle = "bg-emerald-500/15 border-emerald-500 text-emerald-400 scale-[1.01] shadow-lg shadow-emerald-500/5";
+                      } else if (isSelected && !isCorrect) {
+                        btnStyle = "bg-red-500/15 border-red-500 text-red-400 scale-[0.99]";
+                      } else if (isCorrect && isSelected) {
+                        btnStyle = "bg-emerald-500/15 border-emerald-500 text-emerald-400";
+                      } else {
+                        btnStyle = "bg-slate-900/40 border-slate-800/50 text-slate-500 opacity-60";
+                      }
+                    }
+
+                    return (
+                      <button
+                        key={idx}
+                        disabled={selectedAnswerIndex !== null}
+                        onClick={() => handleSelectAnswer(idx)}
+                        className={`w-full text-left p-4 rounded-xl border font-semibold transition-all duration-200 flex items-center justify-between text-sm sm:text-base relative group overflow-hidden ${btnStyle}`}
+                      >
+                        <span className="flex-grow pr-4 leading-normal">{option}</span>
+                        <span className="flex-shrink-0">
+                          {selectedAnswerIndex !== null && isSelected && isCorrect && (
+                            <CheckCircleIcon className="w-5 h-5 text-emerald-400 fill-emerald-950" />
+                          )}
+                          {selectedAnswerIndex !== null && isSelected && !isCorrect && (
+                            <XCircleIcon className="w-5 h-5 text-red-400 fill-red-950" />
+                          )}
+                          {selectedAnswerIndex === null && (
+                            <span className="opacity-0 group-hover:opacity-100 transition duration-150 text-xs text-amber-500/70 border border-amber-500/30 px-2 py-0.5 rounded-md uppercase font-bold tracking-wider">
+                              Choose
+                            </span>
+                          )}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* ASSESSOR FOOTER */}
+                <div className="mt-8 pt-4 border-t border-slate-900/60 text-center">
+                  <p className="text-[10px] text-slate-600 font-mono tracking-widest uppercase">
+                    AQA Biology Assessment Core
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* LEADERBOARD VIEW */}
+            {gameState === 'gameover' && (
+              <div className="w-full max-w-2xl bg-slate-950/40 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md animate-fade-in flex flex-col md:flex-row gap-6 md:gap-8">
+                
+                {/* LEFT: PERFORMANCE SUMMARY */}
+                <div className="flex-grow md:w-1/2 flex flex-col justify-between space-y-6">
+                  <div>
+                    <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+                      <ShieldAlertIcon className="w-8 h-8 text-red-500 stroke-[2]" />
+                    </div>
+                    <span className="text-xs font-black text-red-500/90 uppercase tracking-widest">
+                      Streak Broken!
+                    </span>
+                    <h3 className="text-2xl font-black text-white mt-1">
+                      Good effort, {studentName}!
+                    </h3>
+                    <p className="text-slate-400 text-sm mt-2 leading-relaxed">
+                      Your run has ended. You managed a streak of <span className="font-extrabold text-amber-400">{currentStreak}</span> correct answers.
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-900/50 rounded-2xl p-4 border border-slate-800 flex items-center justify-around text-center">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Run Streak</span>
+                      <p className="text-3xl font-black text-amber-400">{currentStreak}</p>
+                    </div>
+                    <div className="w-px h-10 bg-slate-800" />
+                    <div>
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Best Run</span>
+                      <p className="text-3xl font-black text-white">{highScore}</p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={startNewGame}
+                    className="w-full bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold rounded-xl py-3.5 px-4 shadow-lg shadow-amber-500/15 active:translate-y-[1px] transition flex items-center justify-center space-x-2 text-sm"
+                  >
+                    <RotateCcwIcon className="w-4 h-4 stroke-[2.5]" />
+                    <span>Begin New Run</span>
+                  </button>
+                </div>
+
+                {/* RIGHT: LEADERBOARD GRID */}
+                <div className="flex-grow md:w-1/2 flex flex-col">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center space-x-1.5">
+                      <TrophyIcon className="w-4 h-4 text-amber-400" />
+                      <span>{dbStatus === 'connected' ? 'Global Leaderboard' : 'Local Leaderboard'}</span>
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-mono">Top 15 Runs</span>
+                  </div>
+
+                  <div className="bg-slate-900/40 border border-slate-800 rounded-2xl overflow-hidden max-h-[280px] overflow-y-auto">
+                    {leaderboard.length === 0 ? (
+                      <div className="py-12 text-center text-slate-600 text-xs">
+                        No scores recorded yet. Play a game to post!
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-slate-900">
+                        {leaderboard.map((item, index) => {
+                          const isCurrentUser = item.name === studentName && item.score === currentStreak;
+                          return (
+                            <div 
+                              key={item.id || index} 
+                              className={`px-4 py-2.5 flex items-center justify-between text-xs transition ${
+                                isCurrentUser ? 'bg-amber-500/10 border-l-2 border-l-amber-500' : ''
+                              }`}
+                            >
+                              <div className="flex items-center space-x-3 truncate">
+                                <span className={`font-mono font-bold w-5 text-center ${
+                                  index === 0 
+                                    ? 'text-amber-400 text-sm' 
+                                    : index === 1 
+                                    ? 'text-slate-300' 
+                                    : index === 2 
+                                    ? 'text-amber-600' 
+                                    : 'text-slate-500'
+                                }`}>
+                                  #{index + 1}
+                                </span>
+                                <span className={`font-semibold truncate ${
+                                  isCurrentUser ? 'text-amber-300' : 'text-slate-300'
+                                }`}>
+                                  {item.name}
+                                </span>
+                              </div>
+                              
+                              <div className="flex items-center space-x-1.5">
+                                <span className="font-extrabold text-slate-100">{item.score}</span>
+                                <FlameIcon className={`w-3.5 h-3.5 ${
+                                  item.score >= 15 
+                                    ? 'text-orange-500' 
+                                    : item.score >= 5 
+                                    ? 'text-amber-500' 
+                                    : 'text-slate-600'
+                                }`} />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {dbStatus === 'local' && (
+                    <div className="mt-3 text-center bg-amber-500/5 border border-amber-500/10 rounded-lg p-2.5">
+                      <p className="text-[10px] text-amber-400 leading-normal">
+                        Leaderboard is currently stored on this device only. Click the gear icon above to link a shared Firebase database for your class.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+
+          </main>
+
+          {/* FOOTER BAR */}
+          <footer className="bg-slate-950/40 border-t border-slate-900 py-3 px-4 text-center text-[11px] text-slate-600">
+            <p>© 2026 AQA AS-Level Biology Revision Hub. Fully Optimized for Classroom Deployments.</p>
+          </footer>
+
+          {/* SYSTEM INFO & DATABASE CONNECTIVITY PANEL */}
+          {showConfigModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full relative">
+                <h4 className="text-base font-bold text-white mb-2 flex items-center space-x-2">
+                  <SettingsIcon className="w-5 h-5 text-amber-400" />
+                  <span>Database Link Settings</span>
+                </h4>
+                <p className="text-xs text-slate-400 mb-4 leading-normal">
+                  Link your own Firebase Firestore project so students can access and compete on the same live leaderboard across all devices!
+                </p>
+
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold tracking-wider text-slate-500 mb-2">
+                      Active Status
+                    </label>
+                    <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-850 flex items-center justify-between text-xs">
+                      <span>Connection State:</span>
+                      <span className={`font-bold uppercase ${dbStatus === 'connected' ? 'text-emerald-400' : 'text-amber-400'}`}>
+                        {dbStatus === 'connected' ? 'Connected (Cloud synced)' : 'Disconnected (Local storage fallback)'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">
+                      Paste Firebase Config JSON Object
+                    </label>
+                    <textarea
+                      rows="6"
+                      value={dbConfigJson}
+                      onChange={(e) => setDbConfigJson(e.target.value)}
+                      placeholder='{&#10;  "apiKey": "...",&#10;  "authDomain": "...",&#10;  "projectId": "...",&#10;  "storageBucket": "...",&#10;  "messagingSenderId": "...",&#10;  "appId": "..."&#10;}'
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 font-mono text-xs text-emerald-400 placeholder-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div className="flex space-x-2">
+                  <button
+                    onClick={saveCustomDatabaseConfig}
+                    className="flex-grow bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold py-2 px-4 rounded-xl text-xs hover:from-amber-400 hover:to-amber-300 transition"
+                  >
+                    Save & Test Sync
+                  </button>
+                  <button
+                    onClick={clearCustomDatabaseConfig}
+                    className="bg-slate-950 border border-slate-800 hover:bg-slate-850 text-slate-400 hover:text-slate-200 font-bold py-2 px-4 rounded-xl text-xs transition"
+                  >
+                    Reset Connection
+                  </button>
+                  <button
+                    onClick={() => setShowConfigModal(false)}
+                    className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* RULES OVERVIEW MODAL */}
+          {showRuleModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full relative">
+                <h4 className="text-base font-bold text-white mb-3 flex items-center space-x-2">
+                  <HelpCircleIcon className="w-5 h-5 text-amber-500" />
+                  <span>How to Play</span>
+                </h4>
+                <ul className="space-y-3 text-xs text-slate-300 leading-relaxed mb-6 list-disc list-inside">
+                  <li>Enter your name to initiate your trial run.</li>
+                  <li>Questions are randomized from our structured 100 AQA AS Biology database.</li>
+                  <li>You have exactly <span className="font-semibold text-amber-400">20 seconds</span> to answer every card.</li>
+                  <li>Answering correctly progresses you <span className="font-semibold text-emerald-400">instantly to the next question</span> with no delay or revealed answer panels.</li>
+                  <li>A wrong answer or timeout immediately finishes your run and uploads your current streak rank!</li>
+                </ul>
+                <button
+                  onClick={() => setShowRuleModal(false)}
+                  className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition"
+                >
+                  Close Rules
+                </button>
+              </div>
+            </div>
+          )}
+
+        </div>
+      );
+    }
+
+    // Render App inside Root Hook
+    const container = document.getElementById('root');
+    const root = ReactDOM.createRoot(container);
+    root.render(<App />);
+  </script>
+
+</body>
+</html>
