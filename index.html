@@ -464,18 +464,20 @@
         return `${mins}m ${secs}s`;
       };
 
-      const copyLastRunToClipboard = () => {
+      const submitScoreToLeaderboard = () => {
         if (!lastRunStats) return;
+
+        // 1. Instantly append to the local active state list (and browser localStorage cache)
+        const newId = saveAttemptLocally(lastRunStats.name, lastRunStats.score, lastRunStats.duration);
+        setLastAddedId(newId);
+
+        // 2. Format as a standard CSV structure line
         const now = new Date();
         const formattedDate = now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
-        
-        const uniqueId = lastAddedId || `run-${Date.now()}`;
         const displayTime = formatTime(lastRunStats.duration);
+        const csvRow = `${newId},"${lastRunStats.name.replace(/"/g, '""')}",${lastRunStats.score},"${displayTime}","${formattedDate}"`;
         
-        // Output format fits scores.csv columns perfectly
-        const csvRow = `${uniqueId},"${lastRunStats.name.replace(/"/g, '""')}",${lastRunStats.score},"${displayTime}","${formattedDate}"`;
-        
-        // Standard safe clipboard copy fallback mechanism
+        // 3. Fallback copy clipboard command
         const el = document.createElement('textarea');
         el.value = csvRow;
         document.body.appendChild(el);
@@ -484,7 +486,6 @@
         document.body.removeChild(el);
 
         setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 4000);
       };
 
       const startNewGame = () => {
@@ -496,6 +497,8 @@
         setCorrectTrigger(false);
         setGameStartTime(Date.now());
         setLastAddedId(null);
+        setLastRunStats(null);
+        setCopySuccess(false);
         
         const freshQueue = shuffleArray(QUESTIONS);
         queueRef.current = freshQueue;
@@ -593,9 +596,7 @@
         
         const totalDuration = gameStartTime ? Math.round((Date.now() - gameStartTime) / 1000) : 0;
         
-        // Push and cache student's final score locally
-        const newId = saveAttemptLocally(studentName, currentStreak, totalDuration);
-        setLastAddedId(newId);
+        // Setup stats for run but await student submission to insert into CSV structure
         setLastRunStats({
           name: studentName,
           score: currentStreak,
@@ -707,28 +708,29 @@
                     <div className="bg-slate-900/80 border border-amber-500/20 rounded-2xl p-4 space-y-3 shadow-xl animate-fade-in">
                       <div className="flex items-center space-x-2 text-red-400">
                         <ShieldAlertIcon className="w-4 h-4 flex-shrink-0" />
-                        <span className="text-xs font-black uppercase tracking-wider">Streak Finished!</span>
+                        <span className="text-xs font-black uppercase tracking-wider">Run Finished!</span>
                       </div>
                       <p className="text-[11px] text-slate-300 leading-normal">
-                        <strong>{lastRunStats.name}</strong>, your run concluded at a streak of <span className="text-amber-400 font-extrabold">{lastRunStats.score}</span> correct answers in <span className="font-mono text-slate-200">{formatTime(lastRunStats.duration)}</span>.
+                        <strong>{lastRunStats.name}</strong>, you scored a streak of <span className="text-amber-400 font-extrabold">{lastRunStats.score}</span> in <span className="font-mono text-slate-200">{formatTime(lastRunStats.duration)}</span>.
                       </p>
                       
                       <div className="pt-2">
                         <button
-                          onClick={copyLastRunToClipboard}
+                          onClick={submitScoreToLeaderboard}
+                          disabled={copySuccess}
                           className={`w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wide transition border duration-200 active:scale-[0.98] ${
                             copySuccess 
-                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' 
+                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 cursor-default' 
                             : 'bg-amber-500 hover:bg-amber-400 text-slate-950 border-transparent shadow-lg shadow-amber-500/10'
                           }`}
-                          title="Copy run as CSV row to paste into classroom scores.csv"
+                          title="Submit score and copy backup row"
                         >
                           <CopyIcon className="w-4 h-4" />
-                          <span>{copySuccess ? "Copied score line!" : "Copy Score for Leaderboard"}</span>
+                          <span>{copySuccess ? "Added to Board & Copied!" : "Submit Score to Leaderboard"}</span>
                         </button>
                         {copySuccess && (
                           <span className="block text-[10px] text-emerald-400 text-center mt-1.5 font-semibold animate-fade-in">
-                            ✓ Formatted row copied. Send it to your host/teacher to sync!
+                            ✓ Added to the board below! Backup CSV row copied to your clipboard.
                           </span>
                         )}
                       </div>
@@ -864,7 +866,7 @@
                   {/* MASTER CSV INTEGRATION EXPLANATORY DESCRIPTION */}
                   <div className="mt-4 text-center bg-slate-950/60 border border-slate-800 rounded-xl p-3">
                     <p className="text-[11px] text-slate-400 leading-normal font-medium">
-                      📂 <strong>Centralized Classroom Sync:</strong> Finish your attempt, copy your single-line result row, and submit it to your teacher. They will manually append it into the hosted repository's <code>scores.csv</code> file to update the board for everyone!
+                      📂 <strong>Centralized Classroom Sync:</strong> Finish your attempt, submit it to the board, and send your copied CSV row to the teacher to permanently append into the repository's <code>scores.csv</code> file.
                     </p>
                   </div>
                 </div>
@@ -1018,7 +1020,7 @@
                   <li>Syllabus questions are randomized dynamically from our core database.</li>
                   <li>You have exactly <span className="font-semibold text-amber-400">20 seconds</span> to answer every card.</li>
                   <li>Selecting the correct option advances you <span className="font-semibold text-emerald-400">instantly to the next question</span> with no panels displaying answers.</li>
-                  <li>Choosing a wrong answer or running out of time finishes your run immediately, adds your entry, and returns you to the lobby to see where you placed in the classroom results!</li>
+                  <li>Choosing a wrong answer or running out of time finishes your run immediately, and returns you to the lobby where you can submit your score to place on the classroom leaderboard!</li>
                 </ul>
                 <button
                   onClick={() => setShowRuleModal(false)}
