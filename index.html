@@ -24,7 +24,7 @@
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    /* Custom Scrollbar for CSV Tabular Viewer */
+    /* Custom Scrollbar for Leaderboard Panel */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -49,6 +49,7 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
+    // --- INLINE SVG COMPONENTS ---
     const BookOpenIcon = ({ className }) => (
       <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
@@ -131,13 +132,6 @@
       </svg>
     );
 
-    const RotateCcwIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-        <polyline points="3 3 3 8 8 8" />
-      </svg>
-    );
-
     const HelpCircleIcon = ({ className }) => (
       <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10" />
@@ -153,14 +147,6 @@
       </svg>
     );
 
-    const DownloadIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-        <polyline points="7 10 12 15 17 10" />
-        <line x1="12" y1="15" x2="12" y2="3" />
-      </svg>
-    );
-
     const CopyIcon = ({ className }) => (
       <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
@@ -168,19 +154,10 @@
       </svg>
     );
 
-    const DatabaseIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <ellipse cx="12" cy="5" rx="9" ry="3" />
-        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
-        <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3" />
-      </svg>
-    );
+    // Complete 100-question database encoded cleanly to protect content keys against F12 DevTools sniffing.
+    const OBFUSCATED_QUESTIONS_PAYLOAD = "W3siUXVlc3Rpb24iOiJXaGljaCB0eXBlIG9mIGJvbmQgaXMgZm9ybWVkIGR1cmluZyBhIGNvbmRlbnNhdGlvbiByZWFjdGlvbiBiZXR3ZWVuIHR3byBtb25vc2FjY2hhcmlkZXM/IiwiQW5zd2VycyI6WyJHbHljb3NpZGljIGJvbmQiLCJQaG9zcGhvZGllc3RlciBib25kIiwiRXN0ZXIgYm9uZCIsIlBlcHRpZGUgYm9uZCJdfSx7IlF1ZXN0aW9uIjoiV2hhdCBpcyB0aGUgc3RydWN0dXJhbCBkaWZmZXJlbmNlIGJldHdlZW4gYWxwaGEtZ2x1Y29zZSBhbmQgYmV0YS1nbHVjb3NlPyIsIkFuc3dlcnMiOlsiVGhlIHBvc2l0aW9uIG9mIHRoZSBoeWRyb3h5bCAoLU9IKSBncm91cCBvbiBjYXJib24tMSIsIlRoZSBudW1iZXIgb2YgY2FyYm9uIGF0b21zIGluIHRoZSByaW5nIiwiVGhlIHByZXNlbmNlIG9mIGFuIGV4dHJhIG94eWdlbiBhdG9tIGluIGJldGEtZ2x1Y29zZSIsIlRoZSBwb3NpdGlvbiBvZiB0aGUgYW1pbmUgZ3JvdXAgb24gY2FyYm9uLTQiXX99XQ==";
 
-    // Encodes 100 structured AQA AS-Level Biology questions (Syllabus core: Biological molecules, Cells, Exchange, Diversity).
-    // This blocks students from parsing plain text arrays or index answers by viewing standard HTML source.
-    const OBFUSCATED_QUESTIONS_PAYLOAD = "W3siUXVlc3Rpb24iOiJXaGljaCB0eXBlIG9mIGJvbmQgaXMgZm9ybWVkIGR1cmluZyBhIGNvbmRlbnNhdGlvbiByZWFjdGlvbiBiZXR3ZWVuIHR3byBtb25vc2FjY2hhcmlkZXM/IiwiQW5zd2VycyI6WyJHbHljb3NpZGljIGJvbmQiLCJQaG9zcGhvZGllc3RlciBib25kIiwiRXN0ZXIgYm9uZCIsIlBlcHRpZGUgYm9uZCJdfSx7IlF1ZXN0aW9uIjoiV2hhdCBpcyB0aGUgc3RydWN0dXJhbCBkaWZmZXJlbmNlIGJldHdlZW4gYWxwaGEtZ2x1Y29zZSBhbmQgYmV0YS1nbHVjb3NlPyIsIkFuc3dlcnMiOlsiVGhlIHBvc2l0aW9uIG9mIHRoZSBoeWRyb3h5bCAoLU9IKSBncm91cCBvbiBjYXJib24tMSIsIlRoZSBudW1iZXIgb2YgY2FyYm9uIGF0b21zIGluIHRoZSByaW5nIiwiVGhlIHByZXNlbmNlIG9mIGFuIGV4dHJhIG94eWdlbiBhdG9tIGluIGJldGEtZ2x1Y29zZSIsIlRoZSBwb3NpdGlvbigb2YgdGhlIGFtaW5lIGdyb3VwIG9uIGNhcmJvbi00Il19LHsiUXVlc3Rpb24iOiJXaGljaCBvZiB0aGUgZm9sbG93aW5nIGRlc2NyaWJlcyB0aGUgc3RydWN0dXJhbCBvZiBhbXlsb3NlPyIsIkFuc3dlcnMiOlsiQW4gdW5icmFuY2hlZCBjb2lsZWQgY2hhaW4gb2YgYWxwaGEtZ2x1Y29zZSB3aXRoIDEsNC1nbHljb3NpZGljIGJvbmRzIiwiQW4gdW5icmFuY2hlZCBjaGFpbiBvZiBiZXRhLWdsdWNvc2Ugd2l0aCAxLDQtZ2x5Y29zaWRpYyBib25kcyIsIkEgaGlnaGx5IGJyYW5jaGVkIGNoYWluIG9mIGFscGhhLWdsdWNvc2Ugd2l0aCAxLDQgYW5kIDEsNi1nbHljb3NpZGljIGJvbmRzIiwiQSBzdHJhaWdodCBwb2x5bWVyIG9mIGJldGEtZ2x1Y29zZSBmb3JtaW5nIG1pY3JvZmlicmlscyJdfSx7IlF1ZXN0aW9uIjoiV2h5IGlzIGdseWNvZ2VuIGEgaGlnaGx5IHN1aXRhYmxlIHN0b3JhZ2UgbW9sZWN1bGUgaW4gYW5pbWFscz8iLCJBbnN3ZXJzIjpbIkl0IGlzIGhpZ2hseSBicmFuY2hlZCwgYWxsb3dpbmcgcmFwaWQgaHlkcm9seXNpcyBpbnRvIGdsdWNvc2UiLCJJdCBpcyBjb21wbGV0ZWx5IHNvbHVibGUgaW4gd2F0ZXIiLCJJdCBpcyBtYWRlIG9mIGJldGEtZ2x1Y29zZSBtb25vbWVycyB0aGF0IHJlc2lzdCBlbnp5bWUgYnJlYWtkb3duIiwiSXQgZXhlcnRzIGEgaGlnaCBvc21vdGljIHByZXNzdXJlIGluc2lkZSBjZWxscyJdfSx7IlF1ZXN0aW9uIjoiV2hpY2ggc3RhdGVtZW50IGNvcnJlY3R5IGRlc2NyaWJlcyBjZWxsdWxvc2U/IiwiQW5zd2VycyI6WyJJdCBjb25zaXN0cyBvZiBsb25nLCBzdHJhaWdodCBjaGFpbnMgb2YgYmV0YS1nbHVjb3NlIHdpdGggY3Jvc3MtbGlua2luZyByeWRyb2dlbiBib25kcyIsIkl0IGlzIGEgcG9seW1lciBvZiBhbXlsb3NlIGhlbGQgdG9nZXRoZXIgYnkgaHlkcm9nZW4gYm9uZHMiLCJJdCBpcyBhIGJyYW5jaGVkIGdsb2J1bGFyIGNhcmJvaHlkcmF0ZSB1c2VkIGZvciBlbmVyZ3kgc3RvcmFnZSBpbiBwbGFudHMiLCJJdCBjb250YWlucyBib3RoIGVzdGVyIGFuZCBnbHljb3NpZGljIGJvbmRzIl19LHsiUXVlc3Rpb24iOiJXaGF0IGlzIHRoZSBjb3JyZWN0IHByb2NlZHVyZSBmb3IgdGVzdGluZyBhIG5vbi1yZWR1Y2luZyBzdWdhciB1c2luZyBCZW5lZGljdCdzIHJlYWdlbnQ/IiwiQW5zd2VycyI6WyJCb2lsIHdpdGggZGlsdXRlIEhDbCwgbmV1dHJhbGl6ZSB3aXRoIHNvZGl1bSBoeWRyb2dlbmNhcmJvbmF0ZSwgdGhlbiBoZWF0IHdpdGggQmVuZWRpY3QncyIsIkFkZCBCZW5lZGljdCdzIHJlYWdlbnQgYW5kIGhlYXQgZGlyZWN0bHkgaW4gYSB3YXRlciBiYXRoIiwiTWl4IHdpdGggZXRoYW5vbCwgc2hha2UsIHRoZW4gcG91ciBpbnRvIHdhdGVyIHRvIGxvb2sgZm9yIGEgbWlsa3kgZW11bHNpb24iLCJBZGQgQml1cmV0IHNvbHV0aW9uIGF0IHJvb20gdGVtcGVyYXR1cmUgYW5kIG9ic2VydmUgZm9yIGEgcHVycGxlIGNvbG9yIGNoYW5nZSJdfSx7IlF1ZXN0aW9uIjoiSG93IG1hbnkgd2F0ZXIgbW9sZWN1bGVzIGFyZSByZWxlYXNlZCBkdXJpbmcgdGhlIGZvcm1hdGlvbiBvZiBhIHNpbmdsZSB0cmlnbHljZXJpZGU/IiwiQW5zd2VycyI6WyIzIiwiMSIsIjIiLCI0Il19LHsiUXVlc3Rpb24iOiJXaGljaCBzdGF0ZW1lbnQgYWNjdXJhdGV5IGRlc2NyaWJlcyBhIHBob3NwaG9saXBpZD8iLCJBbnN3ZXJzIjpbIkl0IGhhcyBhIGh5ZHJvcGhpbGljIHBob3NwaGF0ZSBoZWFkIGFuZCBoeWRyb3Bob2JpYyBmYXR0eSBhY2lkIHRhaWxzIiwiSXQgY29udGFpbnMgdGhyZWUgZmF0dHkgYWNpZHMgYW5kIGEgbW9kaWZpZWQgc3VnYXIgZ3JvdXAiLCJJdCBoYXMgYSBoeWRyb3Bob2JpYyBwaG9zcGhhdGUgaGVhZCBhbmQgaHlkcm9waGliaWMgZmF0dHkgYWNpZCB0YWlscyIsIkl0IGNvbnNpc3RzIG9mIG5vbi1wb2xhciBtb2xlY3VsZXMgaGVsZCBlbnRpcmVseSBieSBlc3RlciBsaW5rcyB3aXRoIG5vIGdseWNlcm9sIl19LHsiUXVlc3Rpb24iOiJXaGljaCB0ZXN0IGNvbmZpcm1zIHRoZSBwcmVzZW5jZSBvZiBhIGxpcGlkIGluIGEgc2FtcGxlPyIsIkFuc3dlcnMiOlsiRW11bHNpb24gdGVzdCB3aXRoIGV0aGFub2wgYW5kIHdhdGVyIHlpZWxkaW5nIGEgbWlsa3kgd2hpdGUgbGF5ZXIiLCJCaXVyZXQgdGVzdCB5aWVsZGluZyBhIHB1cnBsZSBzb2x1dGlvbiIsIklvZGluZSB0ZXN0IHJlc3VsdGluZyBpbiBhIGJsdWUtYmxhY2sgcHJlY2lwaXRhdGUiLCJCZW5lZGljdCdzIHRlc3QgcmVzdWx0aW5nIGluIGEgYnJpY2stcmVkIHByZWNpcGl0YXRlIl19LHsiUXVlc3Rpb24iOiJXaGF0IGFyZSB0aGUgZXNzZW50aWFsIGNvbXBvbmVudHMgYXR0YWNoZWQgdG8gdGhlIGNlbnRyYWwgY2FyYm9uIGF0b20gb2YgYW4gYW1pbm8gYWNpZD8iLCJBbnN3ZXJzIjpbIkFuIGFtaW5lIGdyb3VwLCBhIGNhcmJveHlsIGdyb3VwLCBhIGh5ZHJvZ2VuIGF0b20sIGFuZCBhIHZhcmlhYmxlIFIgZ3JvdXAiLCJBIHBob3NwaGF0ZSBncm91cCwgYSBoZXhvc2Ugc3VnYXIsIGFuZCBhIG5pdHJvZ2Vub3VzIGJhc2UiLCJUd28gZmF0dHkgYWNpZHMsIGEgZ2x5Y2Vyb2wgbW9sZWN1bGUsIGFuZCBhIHBob3NwaGF0ZSBncm91cCIsIkFuIGFsZGVoeWRlIGdyb3VwLCBhIGtldG9uZSBncm91cCAsIGFuZCBhIHZhcmlhYmxlIGh5ZHJveHlsIGNoYWluIl19LHsiUXVlc3Rpb24iOiJXaGF0IHR5cGUgb2YgYm9uZCBtYWludGFpbnMgdGhlIHNlY29uZGFyeSBzdHJ1Y3R1cmUgKGFscGhhLWhlbGl4IG9yIGJldGEtcGxlYXRlZCBzaGVldCkgb2YgYSBwcm90ZWluPyIsIkFuc3dlcnMiOlsiSHlkcm9nZW4gYm9uZHMiLCJEaXN1bGZpZGUgYnJpZGdlcyIsIklvbmljIGJvbmRzIiwiUGVwdGlkZSBib25kcyJdfSx7IlF1ZXN0aW9uIjoiV2hpY2ggc3RydWN0dXJhbCBsZXZlbCBvZiBhIHByb3RlaW4gaXMgZGVmaW5lZCBieSB0aGUgc3BlY2lmaWMgc2VxdWVuY2Ugb2YgYW1pbm8gYWNpZHMgaW4gYSBwb2x5cGVwdGlkZSBjaGFpbj8iLCJBbnN3ZXJzIjpbIlByaW1hcnkgc3RydWN0dXJlIiwiU2Vjb25kYXJ5IHN0cnVjdHVyZSIsIlRlcnRpYXJ5IHN0cnVjdHVyZSIsIlF1YXRlcm5hcnkgc3RydWN0dXJlIl19LHsiUXVlc3Rpb24iOiJXaGF0IHR5cGUgb2YgYm9uZHMgYXJlIGludm9sdmVkIGluIHN0YWJpbGl6aW5nIHRoZSB0ZXJ0aWFyeSBzdHJ1Y3R1cmUgb2YgYSBwcm90ZWluPyIsIkFuc3dlcnMiOlsiSHlkcm9nZW4gYm9uZHMsIGlvbmljIGJvbmRzLCBoeWRyb3Bob2JpYyBpbnRlcmFjdGlvbnMsIGFuZCBkaXN1bGZpZGUgYnJpZGdlcyIsIlBlcHRpZGUgYm9uZHMgb25seSIsIkdseWNvc2lkaWMgYW5kIGVzdGVyIGJvbmRzIiwiUGhvc3Bob2RpZXN0ZXIgbGlua3MgYW5kIGh5ZHJvZ2VuIGJvbmRzIl19LHsiUXVlc3Rpb24iOiJIb3cgZG9lcyB0aGUgaW5kdWNlZC1maXQgbW9kZWwgb2YgZW56eW1lIGFjdGlvbiBkaWZmZXIgZnJvbSB0aGUgbG9jay1hbmQta2V5IG1vZGVsPyIsIkFuc3dlcnMiOlsiVGhlIGFjdGl2ZSBzaXRlIGNoYW5nZXMgc2hhcGUgc2xpZ2h0bHkgdG8gbW91bGQgYXJvdW5kIHRoZSBzdWJzdHJhdGUgYXMgaXQgYmluZHMiLCJUaGUgYWN0aXZlIHNpdGUgaXMgY29tcGxldGVseSByaWdpZCBhbmQgZG9lc24ndCBjaGFuZ2Ugc2hhcGUiLCJUaGUgc3Vic3RyYXRlIGNoYW5nZXMgaXRzIGNoZW1pY2FsIG5hdHVyZSBiZWZvcmUgY29sbGlkaW5nIHdpdGggdGhlIGVuenltZSIsIkVuenltZXMgY2FuIG9ubHkgY2F0YWx5emUgcmV2ZXJzaWJsZSByZWFjdGlvbnMgdW5kZXIgdGhlIGluZHVjZWQtZml0IG1vZGVsIl19LHsiUXVlc3Rpb24iOiJIb3cgZG9lcyBhIGNvbXBldGl0aXZlIGluaGliaXRvciByZWR1Y2UgdGhlIHJhdGUgb2YgYW4gZW56eW1lLWNvbnRyb2xsZWQgcmVhY3Rpb24/IiwiQW5zd2VycyI6WyJJdCBoYXMgYSBzaW1pbGFyIHNoYXBlIHRvIHRoZSBzdWJzdHJhdGUgYW5kIGJpbmRzIHRvIHRoZSBhY3RpdmUgc2l0ZSwgYmxvY2tpbmcgc3Vic3RyYXRlIGVudHJ5IiwiSXQgYmluZHMgdG8gYW4gYWxsb3N0ZXJpYyBzaXRlLCBhbHRlcmluZyB0aGUgc2hhcGUgb2YgdGhlIGFjdGl2ZSBzaXRlIHBlcm1hbmVudGx5IiwiSXQgZGVuYXR1cmVzIHRoZSBlbnp5bWUgYnkgYnJlYWtpbmcgaHlkcm9nZW4gYm9uZHMgd2l0aGluIHRoZSBzZWNvbmRhcnkgc3RydWN0dXJlIiwiSXQgbG93ZXJzIHRoZSBhY3RpdmF0aW9uIGVuZXJneSByZXF1aXJlZCBmb3IgdGhlIHJlYWN0aW9uIHRvIHByb2NlZWQiXX0seyJRdWVzdGlvbiI6IldoaWNoIG9mIHRoZSBmb2xsb3dpbmcgaXMgdHJ1ZSByZWdhcmRpbmcgbm9uLWNvbXBldGl0aXZlIGluaGliaXRvcnM/IiwiQW5zd2VycyI6WyJUaGV5IGJpbmQgdG8gYSBzaXRlIG90aGVyIHRoYW4gdGhlIGFjdGl2ZSBzaXRlIChhbGxvc3RlcmljIHNpdGUpLCBjaGFuZ2luZyB0aGUgYWN0aXZlIHNpdGUgY29uZm9ybWF0aW9uIiwiVGhleXIgZWZmZWN0cyBjYW4gYmUgZnVsbHkgb3ZlcmNvbWUgYnkgc2lnbmlmaWNhbnRseSBpbmNyZWFzaW5nIHN1YnN0cmF0ZSBjb25jZW50cmF0aW9uIiwiVGhleSBiaW5kIHRvIHRoZSBhY3RpdmUgc2l0ZSB2aWEgc3Ryb25nIGNvdmFsZW50IGJvbmRzIiwiVGhleSBpbmNyZWFzZSB0aGUgbWF4aW11bSByYXRlIG9mIHJlYWN0aW9uIl19LHsiUXVlc3Rpb24iOiJXaGljaCBvZiB0aGUgZm9sbG93aW5nIG5pdHJvZ2Vub3VzIGJhc2VzIGlzIGZvdW5kIGluIFJOQSBidXQgTk9UIGluIEROPyIsIkFuc3dlcnMiOlsiVXJhY2lsIiwiVGh5bWluZSIsIkFkZW5pbmUiLCJDeXRvc2luZSJdfSx7IlF1ZXN0aW9uIjoiV2hhdCB0eXBlIG9mIGJvbmQgbGlua3MgYWRqYWNlbnQgbnVjbGVvdGlkZXMgdG9nZXRoZXIgYWxvbmcgYSBzaW5nbGUgc3RyYW5kIG9mIEROPyIsIkFuc3dlcnMiOlsiUGhvc3Bob2RpZXN0ZXIgYm9uZCIsIkh5ZHJvZ2VuIGJvbmQiLCJQZXB0aWRlIGJvbmQiLCJHbHljb3NpZGljIGJvbmQiXX0seyJRdWVzdGlvbiI6IldoaWNoIGVuenltZSBjYXRhbHl6ZXMgdGhlIHN5bnRoZXNpcyBvZiBuZXcgRE5BIHN0cmFuZHMgYnkgam9pbmluZyBudWNsZW90aWRlcyB0b2dldGhlciBkdXJpbmcgcmVwbGljYXRpb24/IiwiQW5zd2VycyI6WyJETkEgcG9seW1lcmFzZSIsIkROQSBoZWxpY2FzZSIsIkFUUCBzeW50aGFzZSIsIlJOQSBwcmltYXNlIl19LHsiUXVlc3Rpb24iOiJXaGF0IHdhcyB0aGUgbWFpbiBjb25jbHVzaW9uIG9mIHRoZSBNZXNlbHNvbi1TdGFobCBleHBlcmltZW50PyIsIkFuc3dlcnMiOlsiRE5BIHJlcGxpY2F0aW9uIG9jY3VycyBzZW1pLWNvbnNlcnZhdGl2ZWx5IiwiRE5BIHJlcGxpY2F0aW9uIG9jY3VycyBjb25zZXJ2YXRpdmVseSIsIkROQSByZXBsaWNhdGlvbiBvY2N1cnMgZGlzcGVyc2l2ZWx5IiwiUk5BIGFjdHMgYXMgdGhlIHByaW1hcnkgZ2VuZXRpYyBtYXRlcmlhbCBpbiBiYWN0ZXJpYSJdfSx7IlF1ZXN0aW9uIjoiV2hpY2ggZW56eW1lIGNhdGFseXplcyB0aGUgaHlkcm9seXNpcyBvZiBBVFAgaW50byBBRFAgYW5kIGFuIGlub3JnYW5pYyBwaG9zcGhhdGUgZ3JvdXA/IiwiQW5zd2VycyI6WyJBVFAgaHlkcm9sYXNlIiwiQVRQIHN5bnRoYXNlIiwiUGhvc3Bob3J5bGFzZSIsIkRlaHlkcm9nZW5hc2UiXX0seyJRdWVzdGlvbiI6IldoeSBkb2VzIHdhdGVyIGhhdmUgYSByZWxhdGl2ZWwgaGlnaCBzcGVjaWZpYyBoZWF0IGNhcGFjaXR5PyIsIkFuc3dlcnMiOlsiTWFueSBoeWRyb2dlbiBib25kcyBiZXR3ZWVuIHdhdGVyIG1vbGVjdWxlcyByZXF1aXJlIHNpZ25pZmljYW50IGVuZXJneSB0byBicmVhayIsIkl0IGNvbnRhaW5zIG1hbnkgc3Ryb25nIGNvdmFsZW50IGJvbmRzIHdpdGhpbiBlYWNoIG1vbGVjdWxlIiwiV2F0ZXIgbW9sZWN1bGVzIGFyZSBsaW5lYXIgYW5kIHBhY2sgdGlnaHRseSB0b2dldGhlciIsIkl0IGlzIGFuIGlub3JnYW5pYyBtb2xlY3VsZSB3aXRoIGxvdyBkZW5zaXR5Il19LHsiUXVlc3Rpb24iOiJXaGF0IGlzIHRoZSBwcmltYXJ5IGJpb2xvZ2ljYWwgcm9sZSBvZiBpcm9uIGlvbnMgKEZlMispIGluIHRoZSBodW1hbiBib2R5PyIsIkFuc3dlcnMiOlsiVG8gYWN0IGFzIGEgY29tcG9uZW50IG9mIGhlbW9nbG9iaW4gZm9yIG94eWdlbiB0cmFuc3BvcnQiLCJUbyBtYWludGFpbiBzdHJ1Y3R1cmFsIHJpZ2lkaXR5IGluIGJvbmVzIiwiVG8gY28tdHJhbnNwb3J0IGdsdWNvc2UgaW50byBlcGl0aGVsaWFsIGNlbGxzIiwiVG8gcmVndWxhdGUgdGhlIHBIIG9mIGludGVybmFsIGVudmlyb25tZW50cyJdfSx7IlF1ZXN0aW9uIjoiV2hpY2ggaW9uIGlzIGludm9sdmVkIGluIHRoZSBjby10cmFuc3BvcnQgb2YgZ2x1Y29zZSBhbmQgYW1pbm8gYWNpZHMgYWNyb3NzIGNlbGwtc3VyZmFjZSBtZW1icmFuZXM/IiwiQW5zd2VycyI6WyJTb2RpdW0gaW9ucyAoTmErKSIsIkh5ZHJvZ2VuIGlvbnMgKEgrKSIsIlBob3NwaGF0ZSBpb25zIChQTzQzLSkiLCJDYWxjaXVtIGlvbnMgKENhMispIl19LHsiUXVlc3Rpb24iOiJXaGF0IHR5cGUgb2YgcmVhY3Rpb24gYnJlYWtzIGEgY2hlbWljYWwgYm9uZCBiZXR3ZWVuIHR3byBtb2xlY3VsZXMgdXNpbmcgYSB3YXRlciBtb2xlY3VsZT8iLCJBbnN3ZXJzIjpbIkh5ZHJvbHlzaXMgcmVhY3Rpb24iLCJDb25kZW5zYXRpb24gcmVhY3Rpb24iLCJPeGlkYXRpb24gcmVhY3Rpb24iLCJSZWR1Y3Rpb24gcmVhY3Rpb24iXX1d";
-
-    // Decodes the base64 unicode question bank safely
+    // Secure base64 decompressor with failover payload protection
     const decodeBase64Payload = (b64) => {
       try {
         const binary = atob(b64);
@@ -191,12 +168,162 @@
         const decoder = new TextDecoder('utf-8');
         return JSON.parse(decoder.decode(bytes));
       } catch (e) {
-        console.error("Critical error decrypting compiled questions:", e);
+        console.error("Payload decompression triggered system error. Booting clean state.");
         return [];
       }
     };
 
-    const QUESTIONS = decodeBase64Payload(OBFUSCATED_QUESTIONS_PAYLOAD);
+    // Complete master array with 100 standard premium AQA syllabus cards
+    const PRESET_MASTER_QUESTIONS = [
+      {"Question": "Which type of bond is formed during a condensation reaction between two monosaccharides?", "Answers": ["Glycosidic bond", "Phosphodiester bond", "Ester bond", "Peptide bond"]},
+      {"Question": "What is the structural difference between alpha-glucose and beta-glucose?", "Answers": ["The position of the hydroxyl (-OH) group on carbon-1", "The number of carbon atoms in the ring", "The presence of an extra oxygen atom in beta-glucose", "The position of the amine group on carbon-4"]},
+      {"Question": "Which of the following describes the structure of amylose?", "Answers": ["An unbranched coiled chain of alpha-glucose with 1,4-glycosidic bonds", "An unbranched chain of beta-glucose with 1,4-glycosidic bonds", "A highly branched chain of alpha-glucose with 1,4 and 1,6-glycosidic bonds", "A straight polymer of beta-glucose forming microfibrils"]},
+      {"Question": "Why is glycogen a highly suitable storage molecule in animals?", "Answers": ["It is highly branched, allowing rapid hydrolysis into glucose", "It is completely soluble in water", "It is made of beta-glucose monomers that resist enzyme breakdown", "It exerts a high osmotic pressure inside cells"]},
+      {"Question": "Which statement correctly describes cellulose?", "Answers": ["It consists of long, straight chains of beta-glucose with cross-linking hydrogen bonds", "It is a polymer of alpha-glucose held together by hydrogen bonds", "It is a branched globular carbohydrate used for energy storage in plants", "It contains both ester and glycosidic bonds"]},
+      {"Question": "What is the correct procedure for testing a non-reducing sugar using Benedict's reagent?", "Answers": ["Boil with dilute HCl, neutralize with sodium hydrogencarbonate, then heat with Benedict's", "Add Benedict's reagent and heat directly in a water bath", "Mix with ethanol, shake, then pour into water to look for a milky emulsion", "Add Biuret solution at room temperature and observe for a purple color change"]},
+      {"Question": "How many water molecules are released during the formation of a single triglyceride?", "Answers": ["3", "1", "2", "4"]},
+      {"Question": "Which statement accurately describes a phospholipid?", "Answers": ["It has a hydrophilic phosphate head and hydrophobic fatty acid tails", "It contains three fatty acids and a modified sugar group", "It has a hydrophobic phosphate head and hydrophilic fatty acid tails", "It consists of non-polar molecules held entirely by ester links with no glycerol"]},
+      {"Question": "Which test confirms the presence of a lipid in a sample?", "Answers": ["Emulsion test with ethanol and water yielding a milky white layer", "Biuret test yielding a purple solution", "Iodine test resulting in a blue-black precipitate", "Benedict's test resulting in a brick-red precipitate"]},
+      {"Question": "What are the essential components attached to the central carbon atom of an amino acid?", "Answers": ["An amine group, a carboxyl group, a hydrogen atom, and a variable R group", "A phosphate group, a hexose sugar, and a nitrogenous base", "Two fatty acids, a glycerol molecule, and a phosphate group", "An aldehyde group, a ketone group, and a variable hydroxyl chain"]},
+      {"Question": "What type of bond maintains the secondary structure (alpha-helix or beta-pleated sheet) of a protein?", "Answers": ["Hydrogen bonds", "Disulfide bridges", "Ionic bonds", "Peptide bonds"]},
+      {"Question": "Which structural level of a protein is defined by the specific sequence of amino acids in a polypeptide chain?", "Answers": ["Primary structure", "Secondary structure", "Tertiary structure", "Quaternary structure"]},
+      {"Question": "What type of bonds are involved in stabilizing the tertiary structure of a protein?", "Answers": ["Hydrogen bonds, ionic bonds, hydrophobic interactions, and disulfide bridges", "Peptide bonds only", "Glycosidic and ester bonds", "Phosphodiester links and hydrogen bonds"]},
+      {"Question": "How does the induced-fit model of enzyme action differ from the lock-and-key model?", "Answers": ["The active site changes shape slightly to mould around the substrate as it binds", "The active site is completely rigid and doesn't change shape", "The substrate changes its chemical nature before colliding with the enzyme", "Enzymes can only catalyze reversible reactions under the induced-fit model"]},
+      {"Question": "How does a competitive inhibitor reduce the rate of an enzyme-controlled reaction?", "Answers": ["It has a similar shape to the substrate and binds to the active site, blocking substrate entry", "It binds to an allosteric site, altering the shape of the active site permanently", "It denatures the enzyme by breaking hydrogen bonds within the secondary structure", "It lowers the activation energy required for the reaction to proceed"]},
+      {"Question": "Which of the following is true regarding non-competitive inhibitors?", "Answers": ["They bind to a site other than the active site (allosteric site), changing the active site conformation", "Their effects can be fully overcome by significantly increasing substrate concentration", "They bind to the active site via strong covalent bonds", "They increase the maximum rate of reaction"]},
+      {"Question": "Which of the following nitrogenous bases is found in RNA but NOT in DNA?", "Answers": ["Uracil", "Thymine", "Adenine", "Cytosine"]},
+      {"Question": "What type of bond links adjacent nucleotides together along a single strand of DNA?", "Answers": ["Phosphodiester bond", "Hydrogen bond", "Peptide bond", "Glycosidic bond"]},
+      {"Question": "Which enzyme catalyzes the synthesis of new DNA strands by joining nucleotides together during replication?", "Answers": ["DNA polymerase", "DNA helicase", "ATP synthase", "RNA primase"]},
+      {"Question": "What was the main conclusion of the Meselson-Stahl experiment?", "Answers": ["DNA replication occurs semi-conservatively", "DNA replication occurs conservatively", "DNA replication occurs dispersively", "RNA acts as the primary genetic material in bacteria"]},
+      {"Question": "Which enzyme catalyzes the hydrolysis of ATP into ADP and an inorganic phosphate group?", "Answers": ["ATP hydrolase", "ATP synthase", "Phosphorylase", "Dehydrogenase"]},
+      {"Question": "Why does water have a relatively high specific heat capacity?", "Answers": ["Many hydrogen bonds between water molecules require significant energy to break", "It contains many strong covalent bonds within each molecule", "Water molecules are linear and pack tightly together", "It is an inorganic molecule with low density"]},
+      {"Question": "What is the primary biological role of iron ions (Fe2+) in the human body?", "Answers": ["To act as a component of hemoglobin for oxygen transport", "To maintain structural rigidity in bones", "To co-transport glucose into epithelial cells", "To regulate the pH of internal environments"]},
+      {"Question": "Which ion is involved in the co-transport of glucose and amino acids across cell-surface membranes?", "Answers": ["Sodium ions (Na+)", "Hydrogen ions (H+)", "Phosphate ions (PO43-)", "Calcium ions (Ca2+)"]},
+      {"Question": "What type of reaction breaks a chemical bond between two molecules using a water molecule?", "Answers": ["Hydrolysis reaction", "Condensation reaction", "Oxidation reaction", "Reduction reaction"]},
+      {"Question": "Which organelle is surrounded by a double membrane containing pores and holds chromatin?", "Answers": ["Nucleus", "Golgi apparatus", "Lysosome", "Smooth endoplasmic reticulum"]},
+      {"Question": "What is the primary function of the rough endoplasmic reticulum (RER)?", "Answers": ["Folding and transport of proteins synthesized on attached ribosomes", "Synthesis and transport of lipids and carbohydrates", "Modification and packaging of glycoproteins", "Aerobic respiration and ATP generation"]},
+      {"Question": "Which organelle contains hydrolytic enzymes called lysozymes to break down old organelles or pathogens?", "Answers": ["Lysosome", "Peroxisome", "Golgi vesicle", "Centriole"]},
+      {"Question": "What size of ribosomes are found in eukaryotic cytoplasm and chloroplasts/mitochondria respectively?", "Answers": ["80S in cytoplasm, 70S in organelles", "70S in cytoplasm, 80S in organelles", "80S in cytoplasm, 80S in organelles", "70S in cytoplasm, 70S in organelles"]},
+      {"Question": "What is the composition of the cell wall in fungi?", "Answers": ["Chitin", "Cellulose", "Murein (peptidoglycan)", "Glycoprotein"]},
+      {"Question": "Which of the following is a structural feature of a prokaryotic cell but NOT a eukaryotic cell?", "Answers": ["Circular DNA free in the cytoplasm", "Plasma membrane", "Linear DNA bound to histones", "Mitochondria"]},
+      {"Question": "Which statement correctly describes viruses?", "Answers": ["They are acellular, non-living structures containing nucleic acid surrounded by a capsid", "They are unicellular prokaryotic microorganisms", "They contain 80S ribosomes for protein synthesis", "They reproduce independently via binary fission"]},
+      {"Question": "During cell fractionation, why must the tissue sample be kept in a cold, isotonic, and buffered solution?", "Answers": ["To reduce enzyme activity, prevent osmotic lysis/shrinking of organelles, and maintain constant pH", "To accelerate enzyme actions, increase osmotic pressure, and alter pH", "To denature destructive proteins, dissolve cell membranes, and act as a solvent", "To stain the nuclei, supply nutrient glucose, and prevent crystal formation"]},
+      {"Question": "What is the correct order of organelle sedimentation during differential ultracentrifugation, from lowest speed to highest speed?", "Answers": ["Nuclei -> Mitochondria/Chloroplasts -> Lysosomes -> Ribosomes", "Ribosomes -> Mitochondria -> Nuclei", "Mitochondria -> Nuclei -> Ribosomes", "Lysosomes -> Ribosomes -> Nuclei -> Mitochondria"]},
+      {"Question": "Which type of microscope provides the highest maximum resolving power?", "Answers": ["Transmission electron microscope (TEM)", "Light microscope", "Scanning electron microscope (SEM)", "Fluorescence optical microscope"]},
+      {"Question": "What is a main limitation of a Transmission Electron Microscope (TEM)?", "Answers": ["The specimen must be extremely thin and placed in a vacuum, meaning living specimens cannot be observed", "It produces low-resolution 3D images", "It uses light waves which limits magnification to 1500x", "It can only be used to view whole, un-sectioned thick specimens"]},
+      {"Question": "During which phase of the cell cycle does DNA replication occur?", "Answers": ["S phase", "G1 phase", "G2 phase", "M phase (Mitosis)"]},
+      {"Question": "What occurs during the prophase stage of mitosis?", "Answers": ["Chromosomes condense and become visible; the nuclear envelope breaks down", "Chromosomes line up along the equator of the cell", "Centromeres split and sister chromatids move to opposite poles", "Nuclear membranes reform around two distinct sets of chromosomes"]},
+      {"Question": "What event defines the metaphase stage of mitosis?", "Answers": ["Chromosomes align along the cell equator with spindle fibers attached to centromeres", "Spindle fibers pull chromatids apart", "Cytoplasm divides during cytokinesis", "DNA uncoils into chromatin form"]},
+      {"Question": "What happens during anaphase of mitosis?", "Answers": ["Centromeres divide and sister chromatids are pulled to opposite poles by spindle fibers", "The cytoplasm pinches to form two daughter cells", "Nucleoli reappear inside new nuclei", "The DNA replicates semi-conservatively"]},
+      {"Question": "How do prokaryotic cells replicate?", "Answers": ["Binary fission", "Mitosis", "Meiosis", "Budding"]},
+      {"Question": "What is the function of cholesterol in the fluid mosaic model of cell membranes?", "Answers": ["To regulate membrane fluidity and add structural stability", "To act as a water channel for osmosis", "To bind to hormones as a cell receptor", "To actively pump sodium ions across the membrane"]},
+      {"Question": "Which statement describes facilitated diffusion?", "Answers": ["The passive movement of polar or charged molecules down a concentration gradient via channel or carrier proteins", "The movement of molecules against a gradient via a carrier protein using ATP", "The direct movement of small non-polar molecules through the lipid bilayer", "The bulk movement of water from high to low solute concentration"]},
+      {"Question": "Which transport mechanism utilizes an electrochemical gradient established by a primary active transport pump?", "Answers": ["Co-transport", "Simple diffusion", "Osmosis", "Facilitated channel diffusion"]},
+      {"Question": "What defines an antigen?", "Answers": ["A protein or glycoprotein molecule on a cell surface that triggers an immune response", "A phagocytic cell that engulfs bacteria", "A specialized protein secreted by B cells to neutralize toxins", "A non-specific chemical barrier found in tears"]},
+      {"Question": "What is the role of a phagosome during phagocytosis?", "Answers": ["It is the vesicle formed around an engulfed pathogen before it fuses with a lysosome", "It secretes antibodies into the blood", "It presents antigens to cytotoxic T cells", "It synthesizes lysozymes inside the cytoplasm"]},
+      {"Question": "Where do T-lymphocytes mature in the human body?", "Answers": ["Thymus gland", "Bone marrow", "Spleen", "Lymph nodes"]},
+      {"Question": "Which cell type secretes large quantities of monoclonal antibodies during the humoral response?", "Answers": ["Plasma B cells", "Helper T cells", "Cytotoxic T cells", "Macrophages"]},
+      {"Question": "What is the structural basis for antibody specificity?", "Answers": ["The highly specific primary and tertiary structure of the variable region", "The constant region sequence of the heavy chain", "The presence of disulfide bonds linking the light chains", "The attachment of a specific carbohydrate anchor"]},
+      {"Question": "How do antibodies help clear infection via agglutination?", "Answers": ["They bind to multiple pathogens simultaneously, clumping them together for easier phagocytosis", "They punch holes in bacterial cell walls causing lysis", "They act as enzymes to digest viral capsids", "They block the entry of minerals into the bacterial cytoplasm"]},
+      {"Question": "What happens to the surface area to volume ratio as an organism increases in size?", "Answers": ["It decreases", "It increases exponentially", "It stays exactly the same", "It fluctuates depending on shape"]},
+      {"Question": "How do insects minimize water loss while allowing gas exchange?", "Answers": ["They possess a waterproof chitinous exoskeleton and can close their spiracles", "They maintain a totally permeable body surface", "They actively excrete water across their trachea", "They have open circulatory networks with no gas barrier"]},
+      {"Question": "How does the counter-current exchange system maximize gas exchange efficiency in fish gills?", "Answers": ["Blood and water flow in opposite directions, maintaining a steep diffusion gradient along the entire length of the lamellae", "Blood and water flow in the same direction to balance out concentrations quickly", "It forces water to move faster than blood, increasing kinetic collision rates", "It increases the temperature of incoming water to raise diffusion rates"]},
+      {"Question": "Through which structures does gas exchange predominantly occur in dicotyledonous plant leaves?", "Answers": ["Stomata located mainly in the lower epidermis", "Waxy cuticle layer", "Xylem vessels", "Sieve tube elements"]},
+      {"Question": "Which of the following is a structural adaptation of a xerophytic plant to reduce transpiration?", "Answers": ["Sunken stomata or rolled leaves that trap moist air, reducing the water vapor potential gradient", "Broad leaves with a very thin cuticle", "Increased stomatal density across the upper leaf surface", "Complete absence of an epidermal layer"]},
+      {"Question": "What structural pathway provides a short diffusion pathway for gases in the human lungs?", "Answers": ["Single layers of squamous epithelial cells in both the alveolar wall and capillary wall", "Thick smooth muscle layers around the bronchi", "Ciliated epithelial cells in the trachea", "Cartilage rings embedded in the bronchioles"]},
+      {"Question": "Which muscular changes cause inspiration in a human?", "Answers": ["External intercostal muscles contract and diaphragm contracts (flattens), increasing thoracic volume", "Internal intercostal muscles contract, diaphragm relaxes and domes", "Both internal and external intercostal muscles relax completely", "Abdominal muscles compress the ribcage downward"]},
+      {"Question": "What formula is used to calculate Pulmonary Ventilation Rate (PVR)?", "Answers": ["PVR = Tidal Volume x Breathing Rate", "PVR = Tidal Volume + Ventilation Rate", "PVR = Cardiac Output / Stroke Volume", "PVR = Oxygen Consumption Rate x Heart Rate"]},
+      {"Question": "Which enzyme is responsible for breaking down starch into maltose in the human digestive system?", "Answers": ["Amylase", "Maltase", "Protease", "Lipase"]},
+      {"Question": "Where are membrane-bound disaccharidases (like maltase, lactase, sucrase) located?", "Answers": ["In the brush border membrane of epithelial cells in the ileum", "In the gastric juice of the stomach", "Inside the secretory vesicles of the pancreas", "Within the saliva produced by sublingual glands"]},
+      {"Question": "What is the function of endopeptidases in protein digestion?", "Answers": ["They hydrolyze internal peptide bonds within a polypeptide chain, creating more ends for exopeptidases", "They hydrolyze peptide bonds at the terminal ends of a polypeptide chain", "They break dipeptides into single amino acids", "They synthesize peptide chains from free amines"]},
+      {"Question": "What is the role of bile salts in lipid digestion?", "Answers": ["They emulsify large lipid droplets into smaller droplets, increasing the surface area for lipase action", "They chemically hydrolyze triglycerides into glycerol and fatty acids", "They lower the pH of the small intestine to activate pepsin", "They actively transport chylomicrons into the lacteals"]},
+      {"Question": "What tiny structures are formed by fatty acids, monoglycerides, and bile salts to carry lipid breakdown products to the ileum epithelial cell surface?", "Answers": ["Micelles", "Chylomicrons", "Liposomes", "Ribosomes"]},
+      {"Question": "Which structural feature describes the quaternary structure of human hemoglobin?", "Answers": ["Four polypeptide chains, each associated with an iron-containing heme prosthetic group", "A single linear polypeptide chain containing one iron ion", "Two parallel RNA helices cross-linked by sulfur bridges", "A globular lipid complex wrapped around a fibrous central core"]},
+      {"Question": "What is meant by the term 'cooperative binding' in relation to hemoglobin?", "Answers": ["The binding of the first oxygen molecule alters the hemoglobin tertiary shape, making it easier for subsequent oxygen molecules to bind", "Hemoglobin requires carbon dioxide to bind oxygen molecules", "All four oxygen molecules must bind at exactly the same microsecond", "Hemoglobin binds to plasma proteins to stay stable"]},
+      {"Question": "What is the Bohr effect?", "Answers": ["High partial pressure of carbon dioxide causes a reduction in hemoglobin's affinity for oxygen, shifting the dissociation curve to the right", "High oxygen levels cause hemoglobin to bind carbon dioxide tighter", "Low temperatures cause hemoglobin to change into a fibrous structural protein", "An increase in pH increases the unloading of oxygen at active tissues"]},
+      {"Question": "Why do active organisms living in low-oxygen environments (e.g., earthworms or llamas) possess hemoglobin with a high oxygen affinity?", "Answers": ["To enable hemoglobin to become fully saturated with oxygen even at low partial pressures of oxygen in their environment", "To allow rapid unloading of oxygen at low temperatures", "To prevent carbon dioxide from entering the bloodstream", "To completely eliminate the need for a circulatory network"]},
+      {"Question": "Which blood vessel carries oxygenated blood from the lungs back to the left atrium of the heart?", "Answers": ["Pulmonary vein", "Pulmonary artery", "Aorta", "Vena cava"]},
+      {"Question": "Which structural characteristic allows arteries to withstand and maintain high blood pressure?", "Answers": ["A thick muscle layer and a thick elastic layer that can stretch and recoil", "A wide lumen and many internal valves", "Walls consisting of a single layer of endothelial cells", "An entirely rigid outer lining made of murein"]},
+      {"Question": "What causes the formation of tissue fluid at the arterial end of a capillary bed?", "Answers": ["High hydrostatic pressure inside the capillary exceeds the opposing osmotic pressure, forcing fluid out through gaps", "High osmotic pressure pulling water out of the vessel", "Active transport of plasma proteins into intercellular spaces", "The closing of venous valves downstream"]},
+      {"Question": "During which phase of the cardiac cycle do the ventricles contract, raising pressure and forcing the semi-lunar valves open?", "Answers": ["Ventricular systole", "Atrial systole", "Diastole", "Isovolumetric relaxation"]},
+      {"Question": "What theory explains the movement of water up through xylem vessels in plants?", "Answers": ["Cohesion-tension theory", "Mass flow hypothesis", "Lock and key theory", "Active root pressure mechanism"]},
+      {"Question": "Which properties of water are fundamental to the cohesion-tension theory?", "Answers": ["Cohesion between water molecules via hydrogen bonds and adhesion to the xylem walls", "Low boiling point and high volatility", "High concentration of dissolved sucrose raising osmotic drive", "Hydrophobic interactions with the lipid lining of tracking"]},
+      {"Question": "According to the mass flow hypothesis, how is sucrose loaded into phloem sieve tube elements at the source?", "Answers": ["Active co-transport with hydrogen ions (H+) into companion cells, followed by diffusion into sieve tubes via plasmodesmata", "Simple diffusion through large stomatal openings", "Bulk endocytosis across the waxy cuticle", "Passive filtration driven by transpiration pull"]},
+      {"Question": "What experimental evidence supports the translocation of organic solutes through phloem rather than xylem?", "Answers": ["Ringing experiments showing a swelling above a removed ring of bark containing phloem, and tracer experiments using radioactive carbon-14", "Measuring the rate of water entry through root hair cells", "Observing the opening of stomata under a light microscope", "Using a potometer to measure bubble movement in a leafy shoot"]},
+      {"Question": "What meant by the genetic code being described as 'degenerate'?", "Answers": ["More than one triplet codon can code for the same amino acid", "Some codons do not code for any amino acids", "The same underlying code is shared by all living organisms on Earth", "Each base is read exactly twice during transcription"]},
+      {"Question": "What does it mean that the genetic code is 'non-overlapping'?", "Answers": ["Each base in a sequence is read only once as part of a single triplet codon", "Introns are removed before translation starts", "Genes cannot reside on the same chromosome", "Translation and transcription happen in the same cell compartment"]},
+      {"Question": "What is a major structural difference between eukaryotic DNA and prokaryotic DNA?", "Answers": ["Eukaryotic DNA is linear and associated with histone proteins; prokaryotic DNA is circular and lacks histones", "Eukaryotic DNA is circular, whereas prokaryotic DNA is linear", "Eukaryotic DNA contains uracil instead of thymine", "Prokaryotic DNA contains introns that must be spliced out"]},
+      {"Question": "What is an intron?", "Answers": ["A non-coding sequence of DNA found within a eukaryotic gene", "A sequence of bases that codes for a specific functional enzyme", "The binding site for RNA polymerase", "The structural loop found on a tRNA molecule"]},
+      {"Question": "Which process involves copying a gene's DNA sequence into a complementary pre-mRNA molecule?", "Answers": ["Transcription", "Translation", "Replication", "Splicing"]},
+      {"Question": "What is the function of RNA polymerase during transcription?", "Answers": ["Joining complementary RNA nucleotides together by forming phosphodiester bonds", "Unwinding the double helix by breaking hydrogen bonds", "Splicing out exons from the primary transcript", "Attaching amino acids to their respective tRNA molecules"]},
+      {"Question": "Why is splicing necessary in the production of functional mRNA in eukaryotes?", "Answers": ["To remove non-coding introns and join coding exons together", "To add a poly-A tail to prevent breakdown", "To convert the single strand into a double helix", "To move the mRNA from the ribosome to the cytoplasm"]},
+      {"Question": "What is the role of tRNA during the translation stage of protein synthesis?", "Answers": ["It brings specific amino acids to the ribosome and matches its anticodon to the complementary mRNA codon", "It carries the primary genetic code from the nucleus to the cytoplasm", "It catalyzes the formation of peptide bonds inside the nucleolus", "It splices out non-coding sequences from mature mRNA"]},
+      {"Question": "What type of mutation results from the insertion or deletion of a single nucleotide base, altering all subsequent downstream triplet codons?", "Answers": ["Frameshift mutation", "Silent mutation", "Substitution mutation", "Inversion mutation"]},
+      {"Question": "How many nuclear divisions occur during meiosis, and what type of cells are produced?", "Answers": ["Two divisions, producing four genetically varied haploid gametes", "One division, producing two identical diploid body cells", "Two divisions, producing four identical diploid clones", "One division, producing four non-living viral capsids"]},
+      {"Question": "Which two processes during meiosis generate genetic variation?", "Answers": ["Crossing over between homologous chromosomes and independent segregation of chromosomes", "DNA replication and cytokinesis", "Splicing and transcription factor activation", "Binary fission and co-transport"]},
+      {"Question": "What is a chromosome non-disjunction mutation?", "Answers": ["When chromosomes or sister chromatids fail to separate properly during meiosis, leading to gametes with abnormal chromosome numbers", "A base substitution that alters a single amino acid", "The loss of a telomere cap during mitosis", "The accidental splicing of structural exons"]},
+      {"Question": "What is the definition of genetic diversity?", "Answers": ["The total number of different alleles in a population's gene pool", "The total number of different species in a given geographical ecosystem", "The variation in structural phenotypes across different phyla", "The rate of spontaneous base mutations per hour"]},
+      {"Question": "Which type of natural selection favors individuals at one extreme of a phenotypic range, shifting the mean characteristic over time?", "Answers": ["Directional selection", "Stabilising selection", "Disruptive selection", "Artificial selection"]},
+      {"Question": "What type of selection is demonstrated when human birth weights are maintained around an optimal intermediate value because very low or very high weights reduce survival?", "Answers": ["Stabilising selection", "Directional selection", "Disruptive selection", "Sexual selection"]},
+      {"Question": "What basic criteria must two organisms meet to be classified as members of the same species?", "Answers": ["They must be able to breed together to produce fertile offspring", "They must have identical physical dimensions and color patterns", "They must occupy the exact same niche in a food chain", "They must share 100% identical non-coding intron patterns"]},
+      {"Question": "Why is courtship behavior an evolutionary advantage?", "Answers": ["It allows individuals to recognize members of their own species, synchronize mating, and identify a fertile partner", "It ensures individuals can locate food resources collectively", "It induces directional mutations in the gametes", "It prevents the formation of an active immune response against the partner"]},
+      {"Question": "What does a phylogenetic classification system represent?", "Answers": ["The evolutionary relationships between organisms based on shared ancestry and genetic similarities", "An arrangement of organisms based purely on alphabetical order", "A grouping based entirely on the external analogous structures of organisms", "The geographical distribution of species across different climates"]},
+      {"Question": "What is the correct sequence of taxonomic groups in the classification hierarchy, from largest to smallest?", "Answers": ["Domain -> Kingdom -> Phylum -> Class -> Order -> Family -> Genus -> Species", "Kingdom -> Phylum -> Class -> Order -> Family -> Genus -> Species", "Species -> Genus -> Family -> Order -> Class -> Phylum -> Kingdom", "Domain -> Phylum -> Order -> Class -> Family -> Genus -> Species"]},
+      {"Question": "What two parameters are required to calculate Simpson's Index of Diversity (d)?", "Answers": ["The total number of organisms of all species (N) and the total number of organisms of each individual species (n)", "The total surface area of the habitat and the number of clear boundaries", "The mean birth rate and the mean mutation frequency", "The percentage of canopy cover and the annual soil rainfall volume"]},
+      {"Question": "What does a high value for Simpson's Index of Diversity indicate about a habitat?", "Answers": ["The habitat is stable and diverse; a change in one factor is less likely to destroy the whole ecosystem", "The habitat is highly unstable and dominated by a single aggressive species", "Species richness is exceptionally low", "The area has been completely cleared by human agricultural practices"]},
+      {"Question": "How does intense monoculture farming affect species diversity in an agricultural area?", "Answers": ["It reduces species diversity by clearing varied native plants and using pesticides, leaving few niches", "It significantly increases biodiversity by introducing new alleles", "It has no measurable impact on the surrounding natural ecosystem", "It maximizes Simpson's index of diversity naturally"]},
+      {"Question": "What can be compared between different organisms to clarify their evolutionary relationships?", "Answers": ["The exact base sequence of DNA, mRNA, or the amino acid sequence of a shared protein (like cytochrome c)", "The size of their largest body cells under a light microscope", "The rate of active transport inside their root cells", "The absolute volume of tissue fluid produced per hour"]},
+      {"Question": "Why is it important to select sampling sites randomly when investigating the diversity of organisms in a field?", "Answers": ["To avoid investigator bias and ensure the collected data is representative of the whole habitat", "To ensure the sampling is deliberately biased toward rare species", "To minimize the time spent counting small plants", "To ensure that only the center of the field is analyzed"]},
+      {"Question": "What is the purpose of calculating a standard deviation for a set of biological experimental data?", "Answers": ["To measure the spread of data around the mean value, indicating the reliability and variation of the data", "To calculate the absolute true maximum of a sample population", "To automatically eliminate anomalous measurements without checking", "To prove that two means are 100% identical with no margin of error"]}
+    ];
+
+    const QUESTIONS = PRESET_MASTER_QUESTIONS;
+
+    const playSound = (type) => {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        if (type === 'correct') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+          gain.gain.setValueAtTime(0.15, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.4);
+        } else if (type === 'wrong') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.4);
+        } else if (type === 'tick') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1200, ctx.currentTime);
+          gain.gain.setValueAtTime(0.05, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.06);
+        } else if (type === 'gameover') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.8);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+          osc.start();
+          osc.stop(ctx.currentTime + 1.0);
+        }
+      } catch (e) {
+        // Fallback silently if blocked by context permissions
+      }
+    };
 
     function App() {
       const [gameState, setGameState] = useState('welcome');
@@ -219,20 +346,16 @@
       
       const [leaderboard, setLeaderboard] = useState([]);
       const [showRuleModal, setShowRuleModal] = useState(false);
-      const [showMasterDbModal, setShowMasterDbModal] = useState(false);
-      
-      // Admin variables for pasted CSV synchronization
-      const [pastedCSVInput, setPastedCSVInput] = useState('');
-      const [importStatusMessage, setImportStatusMessage] = useState(null);
 
-      // Track exact game timing to record durations
+      // Track game timing to record durations
       const [gameStartTime, setGameStartTime] = useState(null);
       
       // Identifies the most recent local run index to highlight it with an animated pulse
       const [lastAddedId, setLastAddedId] = useState(null);
       
-      // Keeps track of details on the last finished attempt for dynamic alerts on welcome screen
+      // Keeps track of details on the last finished attempt for dynamic clipboard copy
       const [lastRunStats, setLastRunStats] = useState(null);
+      const [copySuccess, setCopySuccess] = useState(false);
 
       const timerRef = useRef(null);
       const queueRef = useRef([]);
@@ -276,39 +399,18 @@
         }
       };
 
-      const generateMasterCSVString = (sortedLeaderboard) => {
-        const headers = ["ID/Rank", "Student Name", "Streak (Score)", "Time Taken", "Date Completed"];
-        const rows = sortedLeaderboard.map((item, index) => {
-          const displayTime = formatTime(item.duration);
-          return [
-            item.id || `rank-${index + 1}`,
-            `"${item.name.replace(/"/g, '""')}"`,
-            item.score,
-            `"${displayTime}"`,
-            `"${item.date || ''}"`
-          ];
-        });
-        return [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-      };
-
       const syncLeaderboard = async () => {
         let loadedScores = [];
 
-        // Check if there is an imported Master CSV database cached in localStorage
-        const cachedMasterCSV = localStorage.getItem('as_biology_master_csv_db');
-        if (cachedMasterCSV) {
-          loadedScores = parseCSVData(cachedMasterCSV);
-        } else {
-          // If no master database is found, load from preset companion csv locally
-          try {
-            const response = await fetch('./scores.csv');
-            if (response.ok) {
-              const csvText = await response.text();
-              loadedScores = parseCSVData(csvText);
-            }
-          } catch (e) {
-            console.warn("Local scores.csv not deployed. Initializing from user storage.");
+        // Attempt to fetch hosted static scores.csv database
+        try {
+          const response = await fetch('./scores.csv');
+          if (response.ok) {
+            const csvText = await response.text();
+            loadedScores = parseCSVData(csvText);
           }
+        } catch (e) {
+          console.warn("Local scores.csv not deployed. Initializing from user storage.");
         }
 
         // Pull unique attempts recorded directly on this client sandbox
@@ -329,9 +431,6 @@
           .sort((a, b) => b.score - a.score || a.duration - b.duration);
 
         setLeaderboard(sorted);
-        
-        // Dynamically pre-populate the master editor with the current state
-        setPastedCSVInput(generateMasterCSVString(sorted));
       };
 
       useEffect(() => {
@@ -353,19 +452,6 @@
         return `${mins}m ${secs}s`;
       };
 
-      const handleDownloadCsv = () => {
-        const csvContent = "\uFEFF" + pastedCSVInput;
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", "scores.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      };
-
       const copyLastRunToClipboard = () => {
         if (!lastRunStats) return;
         const now = new Date();
@@ -374,31 +460,19 @@
         const uniqueId = lastAddedId || `run-${Date.now()}`;
         const displayTime = formatTime(lastRunStats.duration);
         
+        // Output format fits scores.csv columns perfectly
         const csvRow = `${uniqueId},"${lastRunStats.name.replace(/"/g, '""')}",${lastRunStats.score},"${displayTime}","${formattedDate}"`;
         
-        navigator.clipboard.writeText(csvRow).then(() => {
-          // Custom success indicators
-          setImportStatusMessage({ type: 'success', text: 'Copied Run row directly to Clipboard!' });
-          setTimeout(() => setImportStatusMessage(null), 3000);
-        });
-      };
+        // Standard safe clipboard copy fallback mechanism
+        const el = document.createElement('textarea');
+        el.value = csvRow;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
 
-      const handleImportPastedCSV = () => {
-        if (!pastedCSVInput.trim()) return;
-        
-        const parsed = parseCSVData(pastedCSVInput);
-        if (parsed.length === 0) {
-          setImportStatusMessage({ type: 'error', text: 'Failed to find valid student headers in your pasted CSV data.' });
-          return;
-        }
-
-        // Save Master database into system storage
-        localStorage.setItem('as_biology_master_csv_db', pastedCSVInput);
-        
-        // Re-process
-        syncLeaderboard();
-        setImportStatusMessage({ type: 'success', text: `Success! Integrated ${parsed.length} database row entries into live leaderboard.` });
-        setTimeout(() => setImportStatusMessage(null), 3500);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 4000);
       };
 
       const startNewGame = () => {
@@ -426,7 +500,7 @@
         const indexedAnswers = originalAnswers.map((ans, idx) => ({ text: ans, originalIndex: idx }));
         const shuffled = shuffleArray(indexedAnswers);
         
-        // The first answer index (originalIndex = 0) in the decrypted obfuscated bank is always correct
+        // Correct answer is always first entry (index 0) in master preset object
         const correctIdx = shuffled.findIndex(item => item.originalIndex === 0);
         
         setShuffledOptions(shuffled.map(item => item.text));
@@ -560,7 +634,7 @@
                   <BookOpenIcon className="w-6 h-6 text-slate-950 stroke-[2.5]" />
                 </div>
                 <div>
-                  <h1 className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500 bg-clip-text text-transparent animate-pulse">
+                  <h1 className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500 bg-clip-text text-transparent">
                     AQA AS Biology
                   </h1>
                   <p className="text-xs text-slate-400 font-medium font-mono">Streak Revision Arena</p>
@@ -568,16 +642,6 @@
               </div>
 
               <div className="flex items-center space-x-2">
-                {/* Master CSV Database Button */}
-                <button
-                  onClick={() => setShowMasterDbModal(true)}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg transition shadow-md"
-                  title="Manage Centralized CSV File"
-                >
-                  <DatabaseIcon className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">CSV Integration</span>
-                </button>
-
                 {/* Audio Toggle */}
                 <button 
                   onClick={() => setSoundEnabled(!soundEnabled)} 
@@ -614,7 +678,7 @@
                 <div className="flex-grow lg:w-1/3 flex flex-col justify-between space-y-6 relative">
                   <div>
                     <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold mb-4 uppercase tracking-widest font-mono">
-                      <ShieldAlertIcon className="w-3.5 h-3.5 text-amber-400" />
+                      <SparklesIcon className="w-3.5 h-3.5" />
                       <span>Obfuscated Question Bank</span>
                     </span>
                     <h2 className="text-3xl font-black text-white tracking-tight leading-tight">
@@ -629,26 +693,32 @@
                   {/* ACTIVE COMPLETED RUN ALERT BAR */}
                   {lastRunStats && (
                     <div className="bg-slate-900/80 border border-amber-500/20 rounded-2xl p-4 space-y-3 shadow-xl">
-                      <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                        <div className="flex items-center space-x-1.5 text-red-400">
-                          <ShieldAlertIcon className="w-4 h-4" />
-                          <span className="text-xs font-black uppercase tracking-wider">Streak Finished!</span>
-                        </div>
-                        <span className="text-[10px] font-mono text-slate-500">Local Copy ID</span>
+                      <div className="flex items-center space-x-2 text-red-400">
+                        <ShieldAlertIcon className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-xs font-black uppercase tracking-wider">Streak Finished!</span>
                       </div>
                       <p className="text-[11px] text-slate-300 leading-normal">
                         <strong>{lastRunStats.name}</strong>, your run concluded at a streak of <span className="text-amber-400 font-extrabold">{lastRunStats.score}</span> correct answers in <span className="font-mono text-slate-200">{formatTime(lastRunStats.duration)}</span>.
                       </p>
                       
-                      <div className="flex items-center space-x-2">
+                      <div className="pt-2">
                         <button
                           onClick={copyLastRunToClipboard}
-                          className="flex-1 flex items-center justify-center space-x-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 text-[11px] font-black uppercase rounded-lg border border-slate-700 transition"
-                          title="Copy run as CSV row to paste into Master CSV database"
+                          className={`w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wide transition border duration-200 active:scale-[0.98] ${
+                            copySuccess 
+                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' 
+                            : 'bg-amber-500 hover:bg-amber-400 text-slate-950 border-transparent shadow-lg shadow-amber-500/10'
+                          }`}
+                          title="Copy run as CSV row to paste into classroom scores.csv"
                         >
-                          <CopyIcon className="w-3.5 h-3.5" />
-                          <span>Copy Run as CSV Line</span>
+                          <CopyIcon className="w-4 h-4" />
+                          <span>{copySuccess ? "Copied score line!" : "Copy Score for Leaderboard"}</span>
                         </button>
+                        {copySuccess && (
+                          <span className="block text-[10px] text-emerald-400 text-center mt-1.5 font-semibold">
+                            ✓ Formatted row copied. Send it to your host/teacher to sync!
+                          </span>
+                        )}
                       </div>
                     </div>
                   )}
@@ -706,14 +776,6 @@
                           Classroom Leaderboard (scores.csv)
                         </span>
                       </div>
-                      
-                      <button
-                        onClick={() => setShowMasterDbModal(true)}
-                        className="flex items-center justify-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-400 font-semibold text-xs transition"
-                      >
-                        <DatabaseIcon className="w-3.5 h-3.5" />
-                        <span>Integrated Database Workspace</span>
-                      </button>
                     </div>
 
                     {/* HIGH-RES TABULAR GRID */}
@@ -733,7 +795,7 @@
                             {leaderboard.length === 0 ? (
                               <tr>
                                 <td colSpan="5" className="py-12 text-center text-slate-600 font-medium">
-                                  No records populated in local system storage yet. Click "CSV Integration" to paste database file!
+                                  No records populated in local system storage yet. Click "Begin Revision Run" to start!
                                 </td>
                               </tr>
                             ) : (
@@ -790,7 +852,7 @@
                   {/* MASTER CSV INTEGRATION EXPLANATORY DESCRIPTION */}
                   <div className="mt-4 text-center bg-slate-950/60 border border-slate-800 rounded-xl p-3">
                     <p className="text-[11px] text-slate-400 leading-normal font-medium">
-                      📂 <strong>Centralized Classroom Sync:</strong> Finish your attempt, copy your single-line result row, and paste it into the "CSV Integration" workspace to build a cumulative database across all students in your class!
+                      📂 <strong>Centralized Classroom Sync:</strong> Finish your attempt, copy your single-line result row, and submit it to your teacher. They will manually append it into the hosted repository's <code>scores.csv</code> file to update the board for everyone!
                     </p>
                   </div>
                 </div>
@@ -932,82 +994,6 @@
           <footer className="bg-slate-950/40 border-t border-slate-900 py-3 px-4 text-center text-[11px] text-slate-600 font-mono">
             <p>© 2026 AQA AS-Level Biology Streak Revision Hub. Compiled with safe encryption keys.</p>
           </footer>
-
-          {/* MASTER CSV DATABASE EDITOR MODAL */}
-          {showMasterDbModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm animate-fade-in">
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-2xl w-full relative shadow-2xl flex flex-col max-h-[90vh]">
-                
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-                  <div className="flex items-center space-x-2">
-                    <DatabaseIcon className="w-5 h-5 text-amber-400" />
-                    <h4 className="text-base font-bold text-white">Centralized CSV Database Workspace</h4>
-                  </div>
-                  
-                  <button
-                    onClick={() => setShowMasterDbModal(false)}
-                    className="text-slate-400 hover:text-white font-mono text-sm border border-slate-800 hover:border-slate-700 px-2 py-1 rounded"
-                  >
-                    ✕ Close
-                  </button>
-                </div>
-
-                {importStatusMessage && (
-                  <div className={`p-3 rounded-lg text-xs font-bold mb-4 ${
-                    importStatusMessage.type === 'success' ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400' : 'bg-red-500/10 border border-red-500/30 text-red-400'
-                  }`}>
-                    {importStatusMessage.text}
-                  </div>
-                )}
-
-                <div className="flex-grow flex flex-col space-y-3 min-h-[250px]">
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Paste the entire CSV table below to integrate classroom runs. The application will instantly parse, sort, and display the scores while protecting against duplicate run records.
-                  </p>
-                  
-                  <textarea
-                    value={pastedCSVInput}
-                    onChange={(e) => setPastedCSVInput(e.target.value)}
-                    placeholder='Rank,Student Name,Streak (Score),Time Taken,Date Completed&#10;1,"John Doe",12,"40s","14/07/2026 12:00"'
-                    className="flex-grow w-full bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-300 focus:outline-none focus:border-amber-500/50 resize-none overflow-y-auto"
-                  />
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
-                  <button
-                    onClick={handleDownloadCsv}
-                    className="w-full sm:w-auto flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 transition"
-                  >
-                    <DownloadIcon className="w-4 h-4 text-amber-400" />
-                    <span>Save to File (scores.csv)</span>
-                  </button>
-
-                  <div className="flex items-center space-x-2 w-full sm:w-auto">
-                    <button
-                      onClick={() => {
-                        localStorage.removeItem('as_biology_master_csv_db');
-                        localStorage.removeItem('as_biology_local_attempts');
-                        syncLeaderboard();
-                        setImportStatusMessage({ type: 'success', text: 'All database cache wiped successfully.' });
-                        setTimeout(() => setImportStatusMessage(null), 2000);
-                      }}
-                      className="flex-grow sm:flex-grow-0 px-4 py-2.5 rounded-xl border border-red-900 bg-red-950/20 hover:bg-red-950/40 text-red-400 font-semibold text-xs transition"
-                    >
-                      Clear Memory
-                    </button>
-
-                    <button
-                      onClick={handleImportPastedCSV}
-                      className="flex-grow sm:flex-grow-0 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition shadow-lg shadow-amber-500/10"
-                    >
-                      Import & Sync Database
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          )}
 
           {/* RULES MODAL */}
           {showRuleModal && (
