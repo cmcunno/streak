@@ -132,10 +132,12 @@
       </svg>
     );
 
-    const RotateCcwIcon = ({ className }) => (
+    const TrashIcon = ({ className }) => (
       <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-        <polyline points="3 3 3 8 8 8" />
+        <polyline points="3 6 5 6 21 6" />
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        <line x1="10" y1="11" x2="10" y2="17" />
+        <line x1="14" y1="11" x2="14" y2="17" />
       </svg>
     );
 
@@ -154,15 +156,7 @@
       </svg>
     );
 
-    const TrashIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="3 6 5 6 21 6" />
-        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-        <line x1="10" y1="11" x2="10" y2="17" />
-        <line x1="14" y1="11" x2="14" y2="17" />
-      </svg>
-    );
-
+    // --- QUESTIONS DATABASE (Premium AQA AS-Level Biology Questions) ---
     const QUESTIONS = [
       {
         "Question": "Which type of bond is formed during a condensation reaction between two monosaccharides?",
@@ -363,206 +357,6 @@
         "Question": "What type of reaction breaks a chemical bond between two molecules using a water molecule?",
         "Answers": ["Hydrolysis reaction", "Condensation reaction", "Oxidation reaction", "Reduction reaction"],
         "Correct": 1
-      },
-      {
-        "Question": "Which organelle is surrounded by a double membrane containing pores and holds chromatin?",
-        "Answers": ["Nucleus", "Golgi apparatus", "Lysosome", "Smooth endoplasmic reticulum"],
-        "Correct": 1
-      },
-      {
-        "Question": "What is the primary function of the rough endoplasmic reticulum (RER)?",
-        "Answers": [
-          "Folding and transport of proteins synthesized on attached ribosomes",
-          "Synthesis and transport of lipids and carbohydrates",
-          "Modification and packaging of glycoproteins",
-          "Aerobic respiration and ATP generation"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "Which organelle contains hydrolytic enzymes called lysozymes to break down old organelles or pathogens?",
-        "Answers": ["Lysosome", "Peroxisome", "Golgi vesicle", "Centriole"],
-        "Correct": 1
-      },
-      {
-        "Question": "What size of ribosomes are found in eukaryotic cytoplasm and chloroplasts/mitochondria respectively?",
-        "Answers": [
-          "80S in cytoplasm, 70S in organelles",
-          "70S in cytoplasm, 80S in organelles",
-          "80S in cytoplasm, 80S in organelles",
-          "70S in cytoplasm, 70S in organelles"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "What is the composition of the cell wall in fungi?",
-        "Answers": ["Chitin", "Cellulose", "Murein (peptidoglycan)", "Glycoprotein"],
-        "Correct": 1
-      },
-      {
-        "Question": "Which of the following is a structural feature of a prokaryotic cell but NOT a eukaryotic cell?",
-        "Answers": ["Circular DNA free in the cytoplasm", "Plasma membrane", "Linear DNA bound to histones", "Mitochondria"],
-        "Correct": 1
-      },
-      {
-        "Question": "Which statement correctly describes viruses?",
-        "Answers": [
-          "They are acellular, non-living structures containing nucleic acid surrounded by a capsid",
-          "They am unicellular prokaryotic microorganisms",
-          "They contain 80S ribosomes for protein synthesis",
-          "They reproduce independently via binary fission"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "During cell fractionation, why must the tissue sample be kept in a cold, isotonic, and buffered solution?",
-        "Answers": [
-          "To reduce enzyme activity, prevent osmotic lysis/shrinking of organelles, and maintain constant pH",
-          "To accelerate enzyme actions, increase osmotic pressure, and alter pH",
-          "To denature destructive proteins, dissolve cell membranes, and act as a solvent",
-          "To stain the nuclei, supply nutrient glucose, and prevent crystal formation"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "What is the correct order of organelle sedimentation during differential ultracentrifugation, from lowest speed to highest speed?",
-        "Answers": [
-          "Nuclei -> Mitochondria/Chloroplasts -> Lysosomes -> Ribosomes",
-          "Ribosomes -> Mitochondria -> Nuclei",
-          "Mitochondria -> Nuclei -> Ribosomes",
-          "Lysosomes -> Ribosomes -> Nuclei -> Mitochondria"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "Which type of microscope provides the highest maximum resolving power?",
-        "Answers": ["Transmission electron microscope (TEM)", "Light microscope", "Scanning electron microscope (SEM)", "Fluorescence optical microscope"],
-        "Correct": 1
-      },
-      {
-        "Question": "What is a main limitation of a Transmission Electron Microscope (TEM)?",
-        "Answers": [
-          "The specimen must be extremely thin and placed in a vacuum, meaning living specimens cannot be observed",
-          "It produces low-resolution 3D images",
-          "It uses text/html templates which limits magnification to 1500x",
-          "It can only be used to view whole, un-sectioned thick specimens"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "During which phase of the cell cycle does DNA replication occur?",
-        "Answers": ["S phase", "G1 phase", "G2 phase", "M phase (Mitosis)"],
-        "Correct": 1
-      },
-      {
-        "Question": "What occurs during the prophase stage of mitosis?",
-        "Answers": [
-          "Chromosomes condense and become visible; the nuclear envelope breaks down",
-          "Chromosomes line up along the equator of the cell",
-          "Centromeres split and sister chromatids move to opposite poles",
-          "Nuclear membranes reform around two distinct sets of chromosomes"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "What event defines the metaphase stage of mitosis?",
-        "Answers": [
-          "Chromosomes align along the cell equator with spindle fibers attached to centromeres",
-          "Spindle fibers pull chromatids apart",
-          "Cytoplasm divides during cytokinesis",
-          "DNA uncoils into chromatin form"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "What happens during anaphase of mitosis?",
-        "Answers": [
-          "Centromeres divide and sister chromatids are pulled to opposite poles by spindle fibers",
-          "The cytoplasm pinches to form two daughter cells",
-          "Nucleoli reappear inside new nuclei",
-          "The DNA replicates semi-conservatively"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "How do prokaryotic cells replicate?",
-        "Answers": ["Binary fission", "Mitosis", "Meiosis", "Budding"],
-        "Correct": 1
-      },
-      {
-        "Question": "What is the function of cholesterol in the fluid mosaic model of cell membranes?",
-        "Answers": [
-          "To regulate membrane fluidity and add structural stability",
-          "To act as a water channel for osmosis",
-          "To bind to hormones as a cell receptor",
-          "To actively pump sodium ions across the membrane"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "Which statement describes facilitated diffusion?",
-        "Answers": [
-          "The passive movement of polar or charged molecules down a concentration gradient via channel or carrier proteins",
-          "The movement of molecules against a gradient via a carrier protein using ATP",
-          "The direct movement of small non-polar molecules through the lipid bilayer",
-          "The bulk movement of water from high to low solute concentration"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "Which transport mechanism utilizes an electrochemical gradient established by a primary active transport pump?",
-        "Answers": ["Co-transport", "Simple diffusion", "Osmosis", "Facilitated channel diffusion"],
-        "Correct": 1
-      },
-      {
-        "Question": "What defines an antigen?",
-        "Answers": [
-          "A protein or glycoprotein molecule on a cell surface that triggers an immune response",
-          "A phagocytic cell that engulfs bacteria",
-          "A specialized protein secreted by B cells to neutralize toxins",
-          "A non-specific chemical barrier found in tears"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "What is the role of a phagosome during phagocytosis?",
-        "Answers": [
-          "It is the vesicle formed around an engulfed pathogen before it fuses with a lysosome",
-          "It secretes antibodies into the blood",
-          "It presents antigens to cytotoxic T cells",
-          "It synthesizes lysozymes inside the cytoplasm"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "Where do T-lymphocytes mature in the human body?",
-        "Answers": ["Thymus gland", "Bone marrow", "Spleen", "Lymph nodes"],
-        "Correct": 1
-      },
-      {
-        "Question": "Which cell type secretes large quantities of monoclonal antibodies during the humoral response?",
-        "Answers": ["Plasma B cells", "Helper T cells", "Cytotoxic T cells", "Macrophages"],
-        "Correct": 1
-      },
-      {
-        "Question": "What is the structural basis for antibody specificity?",
-        "Answers": [
-          "The highly specific primary and tertiary structure of the variable region",
-          "The constant region sequence of the heavy chain",
-          "The presence of disulfide bonds linking the light chains",
-          "The attachment of a specific carbohydrate anchor"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "How do antibodies help clear infection via agglutination?",
-        "Answers": [
-          "They bind to multiple pathogens simultaneously, clumping them together for easier phagocytosis",
-          "They punch holes in bacterial cell walls causing lysis",
-          "They act as enzymes to digest viral capsids",
-          "They block the entry of minerals into the bacterial cytoplasm"
-        ],
-        "Correct": 1
       }
     ];
 
@@ -585,13 +379,61 @@
       { id: 'mock-5', name: 'Marcus Vance', score: 11, duration: 90, date: '13/07/2026 11:45' }
     ];
 
+    // --- SAFE SOUND SYNTHESISER ---
+    const playSound = (type) => {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        if (type === 'correct') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+          gain.gain.setValueAtTime(0.15, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.4);
+        } else if (type === 'wrong') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.4);
+        } else if (type === 'tick') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1200, ctx.currentTime);
+          gain.gain.setValueAtTime(0.05, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.06);
+        } else if (type === 'gameover') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.8);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+          osc.start();
+          osc.stop(ctx.currentTime + 1.0);
+        }
+      } catch (e) {
+        // Quietly fail if system audio or browser sandbox is locked
+      }
+    };
+
     function App() {
       const [gameState, setGameState] = useState('welcome');
       const [studentName, setStudentName] = useState('');
       const [currentStreak, setCurrentStreak] = useState(0);
       const [highScore, setHighScore] = useState(0);
       
-      const [shuffledQueue, setShuffledQueue] = useState([]);
       const [currentIndex, setCurrentIndex] = useState(0);
       const [currentQuestion, setCurrentQuestion] = useState(null);
       const [shuffledOptions, setShuffledOptions] = useState([]);
@@ -607,15 +449,17 @@
       const [leaderboard, setLeaderboard] = useState([]);
       const [showRuleModal, setShowRuleModal] = useState(false);
 
-      // Timing tracking variables
+      // Game start time used to track final runtime
       const [gameStartTime, setGameStartTime] = useState(null);
       
-      // Keep track of the most recently submitted attempt's ID to highlight it in the leaderboard
+      // Highlights the most recent run in the leaderboard
       const [lastAddedId, setLastAddedId] = useState(null);
       
-      // Track details of the last broken run to display a subtle alert badge/banner on lobby
+      // Holds statistics of the last run to show in a diagnostic banner
       const [lastRunStats, setLastRunStats] = useState(null);
 
+      // Dynamic queue reference that bypasses asynchronous stale closure locks
+      const queueRef = useRef([]);
       const timerRef = useRef(null);
 
       const syncLeaderboard = () => {
@@ -633,7 +477,7 @@
         }
       };
 
-      // Load scores and personal records on initial mount
+      // Initial loads
       useEffect(() => {
         syncLeaderboard();
         const savedHighScore = localStorage.getItem('as_biology_high_score');
@@ -651,7 +495,7 @@
       };
 
       const handleClearLeaderboard = () => {
-        if (window.confirm("Are you sure you want to clear the entire leaderboard? All scores will be permanently deleted from local storage.")) {
+        if (confirm("Are you sure you want to reset the scoreboard? All achievements will be deleted from your local storage.")) {
           localStorage.setItem('as_biology_leaderboard', JSON.stringify([]));
           setLeaderboard([]);
           setLastAddedId(null);
@@ -667,10 +511,10 @@
         setWrongTrigger(false);
         setCorrectTrigger(false);
         setGameStartTime(Date.now());
-        setLastAddedId(null); // Clear previous highlighting when initiating a new attempt
+        setLastAddedId(null);
         
         const freshQueue = shuffleArray(QUESTIONS);
-        setShuffledQueue(freshQueue);
+        queueRef.current = freshQueue;
         setCurrentIndex(0);
         
         setGameState('playing');
@@ -695,6 +539,7 @@
         setTimeLeft(20);
       };
 
+      // Game countdown ticker
       useEffect(() => {
         if (gameState !== 'playing') return;
 
@@ -738,19 +583,17 @@
             localStorage.setItem('as_biology_high_score', nextStreak.toString());
           }
 
+          // Safe question increment using updated functional state
           setTimeout(() => {
-            const nextIndex = currentIndex + 1;
-            let nextQueue = shuffledQueue;
-            let actualNextIndex = nextIndex;
-            if (nextIndex >= shuffledQueue.length) {
-              nextQueue = shuffleArray(QUESTIONS);
-              setShuffledQueue(nextQueue);
-              actualNextIndex = 0;
-            }
-            
-            setCurrentIndex(actualNextIndex);
-            loadQuestion(nextQueue[actualNextIndex]);
-          }, 550);
+            setCurrentIndex((prevIndex) => {
+              const nextIndex = prevIndex + 1;
+              const activeQueue = queueRef.current;
+              const actualNextIdx = nextIndex >= activeQueue.length ? 0 : nextIndex;
+              
+              loadQuestion(activeQueue[actualNextIdx]);
+              return actualNextIdx;
+            });
+          }, 650);
         } else {
           if (soundEnabled) playSound('wrong');
           setWrongTrigger(true);
@@ -764,10 +607,8 @@
         clearInterval(timerRef.current);
         if (soundEnabled) playSound('gameover');
         
-        // Calculate exact run duration
         const totalDuration = gameStartTime ? Math.round((Date.now() - gameStartTime) / 1000) : 0;
         
-        // Write details into browser sandbox and return with highlight
         const newId = saveAttemptLocally(studentName, currentStreak, totalDuration);
         setLastAddedId(newId);
         setLastRunStats({
@@ -802,11 +643,9 @@
           currentList = [...DEFAULT_MOCK_LEADERBOARD];
         }
 
-        // Add run, sort by score desc, then by duration asc
         currentList.push(newAttemptObj);
         currentList.sort((a, b) => b.score - a.score || a.duration - b.duration);
         
-        // Retain top 100
         const updatedList = currentList.slice(0, 100);
         
         localStorage.setItem('as_biology_leaderboard', JSON.stringify(updatedList));
@@ -863,7 +702,7 @@
             {gameState === 'welcome' && (
               <div className="w-full bg-slate-950/40 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md animate-fade-in flex flex-col lg:flex-row gap-6 lg:gap-8">
                 
-                {/* Decorative Lights */}
+                {/* Decorative Ambient Background Glows */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -872,7 +711,7 @@
                   <div>
                     <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold mb-4 uppercase tracking-widest font-mono">
                       <SparklesIcon className="w-3.5 h-3.5" />
-                      <span>100 Premium Cards</span>
+                      <span>Shuffled Challenges</span>
                     </span>
                     <h2 className="text-3xl font-black text-white tracking-tight leading-tight">
                       Survive The <br/>
@@ -1036,7 +875,7 @@
                   {/* LOCAL STORAGE SYNC DESCRIPTION */}
                   <div className="mt-4 text-center bg-slate-950/60 border border-slate-800 rounded-xl p-3">
                     <p className="text-[11px] text-slate-400 leading-normal font-medium">
-                      💡 <strong>Classroom Sync active:</strong> Every run is saved inside your local browser storage instantly. Use this device to complete challenges and climb up the ranks!
+                      💡 <strong>Instant Storage Integration:</strong> Every attempt saves immediately within your browser sandbox. Share your device in class to challenge friends and claim the high score!
                     </p>
                   </div>
                 </div>
@@ -1189,7 +1028,7 @@
                 </h4>
                 <ul className="space-y-3 text-xs text-slate-300 leading-relaxed mb-6 list-disc list-inside">
                   <li>Enter your student name on the main lobby to start a new session.</li>
-                  <li>Syllabus questions are randomized dynamically from our 100 core database.</li>
+                  <li>Syllabus questions are randomized dynamically from our core database.</li>
                   <li>You have exactly <span className="font-semibold text-amber-400">20 seconds</span> to answer every card.</li>
                   <li>Selecting the correct option advances you <span className="font-semibold text-emerald-400">instantly to the next question</span> with no panels displaying answers.</li>
                   <li>Choosing a wrong answer or running out of time finishes your run immediately, adds your entry, and returns you to the lobby to see where you placed in the classroom results!</li>
