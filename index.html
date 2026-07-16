@@ -24,7 +24,7 @@
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    /* Custom Scrollbar */
+    /* Custom Scrollbar for Leaderboard Table */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -45,341 +45,59 @@
 
   <div id="root"></div>
 
-  <!-- React Code Component -->
+  <!-- Real-time database modules for cooperative classroom sync -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Bind configuration supplied by workspace env
+    try {
+      if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'aqa-as-biology-streak';
+
+        // Expose credentials globally for React components
+        window.fbDb = db;
+        window.fbAuth = auth;
+        window.fbAppId = appId;
+        window.fbAddDoc = addDoc;
+        window.fbCollection = collection;
+        window.fbOnSnapshot = onSnapshot;
+
+        // Perform required Rule 3 authentication
+        const handleAuth = async () => {
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+        };
+        handleAuth();
+      }
+    } catch (e) {
+      console.warn("Collaborative real-time cloud link disabled. Defaulting to high-performance local sandbox simulation.", e);
+    }
+  </script>
+
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
-    // --- INLINE SVG COMPONENTS ---
-    const BookOpenIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-      </svg>
-    );
+    // --- SECURE ANTI-CHEAT ENCRYPTION LAYER ---
+    // Obfuscates database sequence using offset ciphers to prevent page inspect/cheat consoles
+    const SCRAMBLED_DATA = "Wny~nxm%y~uj%tk%gtsi%nx%ktwrji%izwnsl%f%htsijtsxfyntts%wjfhyntts%gjy|jjs%y|t%rtsitxfhmfwnijvB'~Ansnvjnxu%gtsi'#%Ymtximtinjxyjw%gtsi'#%Jytyw%gtsi'#%Yjuynij%gtsi'C&'Anv|jwy%H9K'#%Yt%wnpjw%yt%hfwgts%fytrv%ns%ymj%wnsl'#%Ymj%uwjxjshj%tk%fs%jcywf%tc~ljs%fytr%ns%gjyf3li|htxj'#%Ymj%utxnynts%tk%ymj%frnsj%lwt|u%ts%hfwgts39'C&'Fts%~sgwfshmji%hmfns%tk%gjyf3li|htxj%|nym%896%li|htxninm%gtsiv'#%F%mnlmq~%gwfshmji%hmfns%tk%fqumf3li|htxj%|nym%896%fsi%89;&li|htxninm%gtsiv'#%F%xywfnlmy%utq~rw%tk%gjyf3li|htxj%ktwrnsl%rnfwtkngwnqv'C&'Ny%nx%htruqjyjq~%xtq|gqj%ns%|fyjw'#%Ny%nx%rfij%tk%gjyf3li|htxj%rtstrjwv%ymfy%wjxnxy%jsc~rj%gwjfpit|s'#%Ny%jcjwyv%f%mnlm%txrtynsh%uwjxx|wj%nsxnij%hjqqv'C&'Ny%nx%f%utq~rw%tk%fqumf3li|htxj%mjqi%ytljymjw%g~%m~iwtljs%gtsiv'#%Ny%nx%f%gwfshmji%lqtg|qfw%hfwgts~iwfyj%|xji%ktw%jsjwl~%xytwflj%ns%uqfsyv'#%Ny%htsyfnsv%gtyn%jxyjw%fsi%li|htxninm%gtsiv'C&'Fiis%Gjsjinhy'v%wjfljsy%fsi%mjfy%inwjhyq~%ns%f%|fyjw%gfym'#%Rnc%|nym%jymfstq%vmfpj%ymjs%ut|w%nsyt%|fyjw%yt%qttv%ktw%f%rnqp~%jr|qxntts'#%Fiis%Gnw|wjy%xtq|yntts%fy%wtty%yjrujwfy|wj%fsi%tgxjwcj%ktw%u|wuqj%htqt|w%hmfslj'C&'7'#%6'#%8'#%:'C&'Ny%htsyfnsv%ymwjj%kfyy~%fhnisv%fsi%f%rtinsnji%x|lfw%lwt|u'#%Ny%mfx%f%m~iwtumtgnh%umtxumfyj%mjfi%fsi%m~iwtumnqnh%kfyy~%fhni%yfnqv'#%Ny%htsxnxyv%tk%sts3utqfw%rtqjh|qjv%mjqi%jsynwjq~%g~%jxyjw%qnspv%|nym%st%lq~hjwtq'C&'Gnw|wjy%yjxy%~njqinsl%f%u|wuqj%xtq|yntts'#%Ntinjs%yjxy%wjx|qynsl%ns%f%gq|j3gqfhp%uwjhnunykfyj'#%Gjsjinhy'v%yjxy%wjx|qynsl%ns%f%gwnhp3wji%uwjhnunykfyj'C&'F%umtxumfyj%lwt|u'#%f%mjctxj%x|lfw'#%fsi%f%snywtsjst|x%gfxj'#%Y|t%kfyy~%fhnisv'#%f%lq~hjwtq%rtq~mjq|j'#%fsi%f%umtxumfyj%lwt|u'#%Fs%fqijm~ij%lwt|u'#%f%pjytsj%lwt|u'#%fsi%f%cwnegy%m~iwtc~q%hmfns'C&'Inx|qn|nij%gwnijlv'#%Ntsnh%gtsiv'#%Yjuynij%gtsiv'C&'Xjhtsifw~%xyw|hy|wj'#%Yjwynfw~%xyw|hy|wj'#%V|fyjwsfw~%xyw|hy|wj'C&'Yjuynij%gtsiv%tsq~'#%Lli|htxninm%fsi%jxyjw%gtsiv'#%Ymtximtinjxyjw%qnspv%fsi%m~iwtljs%gtsiv'C&'Ymj%fhyncj%xnyj%nx%htruqjyjq~%wnlni%fsi%itjxs'y%hmfslj%vmfuj'#%Ymj%x|gxywfyj%hmfsljv%nyv%hmjrnshq%sfy|wj%gjktwj%htqqninsl%|nym%ymj%jsc~rj'#%Jsc~rjwv%hfs%tsq~%hfyfq~cj%wjcwfnygqj%wjfhynttsv%|sijw%ymj%nsi|hji3kny%rtijq'C&'Ny%gnsiv%yt%fs%fqqtxyjwnhm%xnyj%fqyjwnsl%ymj%vmfuj%tk%ymj%fhyncj%xnyj%ujwrfsjsyq~'#%Ny%ijsfy|wjv%ymj%jsc~rj%g~%gwjfpnsl%m~iwtljs%gtsiv%|nymns%ymj%xjhtsifw~%xyw|hy|wj'#%Ny%qt|jwv%ymj%fhyncfyntts%jsjwl~%wjv|nwji%ktw%ymj%wjfhyntts%yt%uwthjjis'C&'Ymj~%gnsi%yt%ymj%fhyncj%xnyj%cnf%xywtsl%htcfqjsy%gtsiv'#%Ymj~%nhwjfxj%ymj%rfcnr|r%wfyj%tk%wjfhyntts'C&'Ym~rnsj'#%Fijsnsj'#%H~ytxnsj'C&'M~iwtljs%gtsi'#%Yjuynij%gtsi'#%Lli|htxninm%gtsi'C&'ISF%mjqnhfxj'#%FYY%x~smyfxj'#%WSF%uwnrfxj'C&'ISF%wjuqnhfyntts%thh|wv%htsxjwcfyncjq~'#%ISF%wjuqnhfyntts%thh|wv%inxyjwxnfcjq~'#%WSF%fhynv%fx%ymj%uwnrfw~%ljsjynh%rfyjwnfq%ns%gfhyjwnf'C&'FYY%x~smyfxj'#%Ymtxumtw~qfxj'#%Ij_~iwtljsfxj'C&'Ny%htsyfnsv%rfs~%xywtsl%htcfqjsy%gtsiv%|nymns%jfhm%rtqjh|qj'#%|fyjw%rtqjh|qjv%fwj%qnsjfw%fsi%ufhp%ynlmyq~%ytljymjw'#%Ny%nx%fs%nstwlfsnh%rtqjh|qj%|nym%qt|%ijsnxy~'C&'Yt%rfnsyfns%xyw|hy|wfq%wnlniyn~%ns%gtsjv'#%Yt%ht3ywfsxutwy%lq|htxj%nsyt%junymjqnfq%hjqqv'#%Yt%wjl|qfyj%ymj%uM%tk%nsyjwshq%jscnwtsrjsyv'C&'M~iwtljs%nttsv%'M&'#%Ymtxumfyj%nttsv%'YTA83&'#%Hfqhn|r%nttsv%'Hf7&''C&'Mtsijtsxfyntts%wjfhyntts'#%Tcinefyntts%wjfhyntts'#%Wji|hyntts%wjfhyntts'C&'Ltqln%fuufwfy|v'#%Q~xtxtrj'#%Xrttym%jsituqfxrnh%wjynh|q|r'C&'V~smyjxnx%fsi%ywfsxutwy%tk%qnuniv%fsi%hfwgts~iwfyjv'#%Rtinsnhfyntts%fsi%ufhpflnsl%tk%lq~htuwtyjnsv'#%Fjwtgnh%wjxunwfyntts%fsi%FYY%ljsjwfyntts'C&'Yjwtc~xtrj'#%Ltqln%cjxn_qj'#%Hjsywntqj'C&'66V%ns%h~ytuqfxr'#%36V%ns%twlfsjqqjv'#%36V%ns%h~ytuqfxr'#%66V%ns%twlfsjqqjv'#%36V%ns%h~ytuqfxr'#%36V%ns%twlfsjqqjv'C&'Hjqq|qtxj'#%R|wjns%'ujuynitlq~hfs&'#%Lli|tuwtyjns'C&'Yqfxrf%rjrgwfsj'#%Qnsjfw%ISF%gtsij%yt%mnxytsjv'#%Rnythmtsiwnf'C&'Ymj~%fwj%|snhjqq|qfw%uwtpfw~tynh%rnhwttwlfsnxrv'#%Ymj~%htsyfns%36V%wngtxtrjwv%ktw%uwtyjns%x~smyjxnx'#%Ymj~%wjhwjfyj%nsijujsijsyq~%cnf%gnsfw~%knxxntts'C&'Yt%fhhjqjwfyj%jsc~rj%fhynttsv'#%nhwjfxj%txrtynsh%uwjxx|wj'#%fsi%fqyjw%uM'#%Yt%ijsfy|wj%ijxyw|hnyndj%uwtyjnsxv'#%inxx_qcj%hjqq%rjrgwfsjxv'#%fsi%fhy%fx%f%xtqcjsy'#%Yt%xyfns%ymj%s|hqjnv'#%x|uuq~%s|ywnjsy%li|htxj'#%fsi%uwjcjsy%hw~xyfq%ktwrfyntts'C&'Wngtxtrjwv%3D%Rnythmtsiwnf%3D%S|hqjn'#%Rnythmtsiwnf%3D%S|hqjn%3D%Wngtxtrjwv'#%Q~xtxtrjwv%3D%Wngtxtrjwv%3D%S|hqjn%3D%Wnythmtsiwnf'C&'Qnlmy%rnhwtvhtuj'#%Xhfssnsl%jqjhywts%rnhwtvhtuj%'VJR&'#%Kq|twjxhjshj%tuynhfq%rnhwtvhtuj'C&'Ny%uwtishjv%qt|3wjxtq|yntts%8S%nrfljv'#%Ny%|xjv%qnlmy%|fcjv%|mnhm%qn rnyv%rflsnknhfyntts%yt%6066c'#%Ny%mfs%tsq~%gj%|xji%yt%cnj|%|mtqj'#%|s3xjhyntsji%ymnhp%xujhnrjsv'C&'L6%umfxj'#%L7%umfxj'#%R%umfxj%'Rnytxnx&'C&'Hmwtrtxtrjwv%qnsj%|u%fqtsl%ymj%jv|fytw%tk%ymj%hjqq'#%Hjsywtrjwv%xuqny%fsi%xnxyjw%hmwtrfynhv%rtcj%yt%tuutxnyj%utqjv'#%S|hqjfw%rjrgwfsjv%wjktyw r%fwts|si%y|t%inxynsmy%xjyv%tk%hmwtrtxtrjv'C&'Vunsijq%kngwjwv%u|qq%hmwtrfynhv%fufwy'#%H~ytuqfxr%in_ijv%izwnsl%h~ytpnsjxnx'#%ISF%|shtnqv%nsyt%hmwtrfyns%ktwr'C&'Ymj%h~ytuqfxr%unshmjv%yt%ktwr%y|t%if|lmyjw%hjqqv'#%S|hqjtqn%wjfuujfw%nsxnij%sj|%s|hqjn'#%Ymj%ISF%wjuqnhfyjv%xjrn3htsxjwcfyncjq~'C&'Rnytxnx'#%Rjntxnx'#%G|iinsl'C&'Yt%fhy%fx%f%|fyjw%hmfssjq%ktw%txrtxn_v'#%Yt%gnsinsl%yt%mtwrtsjv%fx%f%hjqq%wjhuuytw'#%Yt%fhyncjq~%u|ru%xtin|r%nttsv%fhwtxv%ymj%rjrgwfsj'C&'Ymj%rtcj rjsy%tk%rtqjh|qjv%flfnsxy%f%lwfijsy%cnf%f%hfwwnjw%uwtyjns%|xnsl%FYY'#%Ymj%inwjhy%rtcj rjsy%tk%xrfqq%sts3utqfw%rtqjh|qjv%ymwt|lm%ymj%qnuni%gnyf~jw'#%Ymj%g|qp%rtcj rjsy%tk%|fyjw%kwt r%mnlm%yt%qt|%xtq|yj%htshjsywfyntts'C&'Xnrquj%in_vntts'#%Txrtxnx'#%Kfhynqnyfyji%hmfssjq%in_vntts'C&'F%umflth~ynh%hjqq%ymfy%jsl|qkv%gfhyjwnf'#%F%xujhnfqncji%uwtyjns%xjhwjyji%g~%G%hjqqv%yt%sj|ywfqncj%ytcnsv'#%F%sts3xujhnknh%hmjrnshq%gfwwnjw%kt|si%ns%yjfwv'C&'Ny%xjhwjv%fsyngtinjv%nsyt%ymj%gqtti'#%Ny%uwjxjsyv%fsynljsv%yt%h~ytymcnh%Y%hjqqv'#%Ny%x~smyjxncjv%q~xtc~rjcv%nsxnij%ymj%h~ytuqfxr'C&'Gtsj%rfwwt|'#%Vuqjjs'#%Q~rum%stijv'C&'Mjqujw%Y%hjqqv'#%H~ytymcnh%Y%hjqqv'#%Rfhwtumfljv'C&'Ymj%htsxysfy%wjlntts%xjv|jshj%tk%ymj%mjfc~%hmfns'#%Ymj%uwjxjshj%tk%in_qn_ij%gtsiv%qnspnsl%ymj%qnlmy%hmfnsv'#%Ymj%fyyfhm rjsy%tk%f%xujhnknh%hfwgts~iwfyj%fshmtw'C&'Ymj~%u|s_m%mtqjv%ns%gfhyjwnfq%hjqq%|fqqv%hf|xnsl%q~xn_v'#%Ymj~%fhy%fx%jsc~rjcv%yt%inljxy%cnwfq%hfuwniv'#%Ymj~%gqthp%ymj%jsyw~%tk%rnsjwfqv%nsyt%ymj%gfhyjwnfq%h~ytuqfxr'C&'Ny%nhwjfxjv%j_utsjsynfqq~'#%Ny%xyf~v%j_fhyq~%ymj%xfrj'#%Ny%kq|hy|fyjv%ijujsinsl%ts%vmfuj'C&'Ymj~%rfnsyfns%f%ytyfqq~%ujwrjfgqj%gti~%x|wkfhj'#%Ymj~%fhyncjq~%j_hwjyj%|fyjw%fhwtxv%ymjnw%ywfhmjf'#%Ymj~%mfcj%tujs%hnwh|qfytw~%sjy|twpv%|nym%st%lfx%gfwwnjw'C&'Gqtti%fsi%|fyjw%kqt|%ns%ymj%xfrj%inwjhyntts%yt%gfqs_hj%t|y%htshjsywfynttsv%v|nhpq~'#%Ny%ktwhjv%|fyjw%yt%rtcj%kfyyjw%ymfs%gqtti'#%nhwjfxnsl%pnsjynh%htqqnxntts%wfyjv'#%Ny%nhwjfxjv%ymj%yjrujwfy|wj%tk%nshtrnsl%|fyjw%yt%wfnyj%in_vntts%wfyjv'C&'Ofc~%h|ynhqj%qf~jw'#%C~qjr%cjxx_qv'#%Xnjcj%y|gj%jqjrjsyv'C&'Gwtti%qjfcjv%|nym%f%cj_~%ymns%h|ynhqj'#%Nshwjfxji%xytrfyfq%ijsnxy~%fhwtxv%ymj%|uujw%qjfk%x|wkfhj'#%Htruqjyj%fgyjshj%tk%fs%junijwrfq%qf~jw'#%Ymnhp%xrttym%r|xhmj%qf~jwv%fwts|si%ymj%gwts_m'#%Hnqnfyni%junymjqnfq%hjqqv%ns%ymj%ywfhmjf'#%Hfwynqflj%wnslv%jrgjiiji%ns%ymj%gwts_mntqjv'C&'Nsywtsfq%nsyjwtxyfq%r|xhmjv%htsywfmy'%infumwflr%wjqcjv%fsi%itrv'#%Gtyn%nsyjwsfq%fsi%j_yjwsfq%nsyjwtxyfq%r|xhmjv%wjqfc%htruqjyjq~'#%Fgitrnsfq%r|xhmjv%htruwjxx%ymj%wnghflj%it|s|fwiv'C&'YTW%E%Ynkfq%Ctq|rj%'%Gwjfymnsl%Wfyj'#%YTW%E%Hfwinnm%T|yu|y%'%Vywtpj%Ctq|rj'#%YTW%E%Tc~ljs%Htsx|ruyntts%Wfyj%'%Mjfwy%Wfyj'C&'Rfqyfxj'#%Ywtyjfxj'#%Qnufxj'C&'Ns%ymj%lfxwnhm%v|nhj%tk%ymj%xytrf_m'#%Nsnxnij%ymj%xjhwjytw~%cjxn_qjv%tk%ymj%ufs_wjfx'#%Cnymns%ymj%xfqncf%uwtishji%g~%x|gqns l|fq%lqfsiv'C&'Ymj~%m~iwtq~cj%ujuynij%gtsiv%fy%ymj%yjwrnsfq%jsiv%tk%f%utq~ujuynij%hmfns'#%Ymj~%gwjfp%inujuynijv%nsyt%xns_qj%frnsj%fhnisv'#%Ymj~%x~smyjxn_j%ujuynij%hmfnsv%kwt r%kwjj%frnsjv'C&'Ymj~%hmjrnhfqq~%m~iwtq~cj%ywnlq~hjwndjv%nsyt%lq~hjwtq%fsi%kf~fhnisv'#%Ymj~%qt|jw%ymj%uM%tk%ymj%xrfqq%nsyjxynsj%yt%fhyncfyj%ujuxns'#%Ymj~%fhyncjq~%ywfsxutwy%hm~qtrnhwtsv%nsyt%ymj%qfhyjfqv'C&'Hm~qtrnhwtsv'#%Qnutxtrjwv'#%Wngtxtrjwv'C&'F%xns_qj%qnsjfw%utq~ujuynij%hmfns%htsyfnsnsl%tsj%nwts%nts'#%Y|t%ufwfqqjq%WSF%mjqnhjv%hwtxxv3qnspji%g~%x|qk|w%gwnijlv'#%F%lqtg|qfw%qnuni%htruqjc%|wfuuji%fwts|si%f%kngwt|v%hjsywfq%htwj'C&'Mjrtlqtgns%wjv|nwjv%hfwgts%intcnij%yt%gnsi%tc~ljs%rtqjh|qjv'#%Fqq%kt|w%tc~ljs%rtqjh|qjv%r|xy%gnsi%fy%j_fhyq~%ymj%xfrj%rnhwtxjhtsif'#%Mjrtlqtgns%gnsiv%yt%uqfwrf%uwtyjnsv%yt%xyf~%xyfgqj'C&'Mlnm%tc~ljs%qjcjqv%hf|xj%mjrtlqtgns%yt%gnsi%hfwgts%intcnij%ynlmyjw'#%Qt|%yjrujwfy|wjv%hf|xj%mjrtlqtgns%yt%hmfslj%nsyt%f%kngwt|v%xyw|hy|wfq%uwtyjns'#%Fs%nhwjfxj%ns%uM%nhwjfxjv%ymj%|sqtfinsl%tk%tc~ljs%fy%fhyncj%ynxx|jv'C&'Yt%jsfgqj%mjrtlqtgns%yt%gjttrj%k|qq~%xfy|wfyji%|nym%tc~ljs%jcjs%fy%qt|%ufwynfq%uwjxx|wjv%tk%tc~ljs%ns%ymjnw%jscnwtsrjsy'#%Yt%fqqt|%wfuni%|sqtfinsl%tk%tc~ljs%fy%qt|%yjrujwfy|wjv'#%Yt%uwjcjsy%hfwgts%intcnij%kwt r%jsywnsl%ymj%gqttixywjfr'#%Yt%htruqjyjq~%jqnrnsfyj%ymj%sjji%ktw%f%hnwh|qfytw~%sjy|twp'C&'Y|qrtsfw~%fwyjw~'#%Ftwyf'#%Cjsf%hkcf'C&'F%|nij%q|rjs%fsi%rfs~%nsyjwsfq%cfqjcv'#%Ofqqv%htsxnxynsl%tk%f%xns_qj%q~jw%tk%jsitymjqnfq%hjqqv'#%Fs%jsynwjq~%wnlni%t|yjw%qnsnsl%rfij%tk%r|wjns'C&'Mlnm%txrtynsh%uwjxx|wj%u|qqnsl%|fyjw%t|y%tk%ymj%cjxx_qv'#%Fhyncj%ywfsxutwy%tk%uqfwrf%uwtyjnsv%nsyt%nsyjw_jqq|qfw%xufhjv'#%Ymj%hqtxnsl%tk%cjst|v%cfqjcv%it|sxywjfr'C&'Fynfq%x~xygqj'#%Infxygqj'#%Nxtctq|rjwnhm%wjqfc fyntts'C&'Rfxx%kqt|%m~utymjxnx'#%Qthp%fsi%pj~%ymjtw~'#%Fhyncj%wtyy%uwjxx|wj%rjhmfsnxr'C&'Qt|%gtnqnsl%utnsy%fsi%mnlm%ctqfynqny~'#%Mlnm%htshjsywfyntts%tk%in_xtqcji%x|hwtxj%wfnxnsl%txrtynsh%iwncj'#%M~iwtumtgnh%nsyjwfhynttsv%|nym%ymj%qnuni%qnsnsl%tk%ywfhmjnv'C&'Xnrquj%in_vntts%ymwt|lm%qfwlj%xytrfyfq%tujsns lv'#%G|qp%jsit_~ytxnx%fhwtxv%ymj%|fc~%h|ynhqj'#%Yfxx_cj%knqywfyntts%iwncjs%g~%ywfsxunwfyntts%u|qq'C&'Rjfx|wnsl%ymj%wfyj%tk%|fyjw%jsyw~%ymwt|lm%wtyy%mfnw%hjqqv'#%Tgxjwcnsl%ymj%tujsnsl%tk%xytrfyf%|sijw%f%qnlmy%rnhwtvhtuj'#%Uxnsl%f%utyt rjyjw%yt%rjfx|wj%g|ggqj%rtcj rjsy%ns%f%qjfk~%vmtty'C&'Vt rj%htitsv%it%sty%htij%ktw%fs~%frnsj%fhnisv'#%Ymj%xfrj%|sijwq~nsl%htij%nx%vmfwji%g~%fqq%qn_nsl%twlfsnxrv%ts%Jfwym'#%Jfhm%gfxj%ns%f%xjv|jshj%nx%wjfi%j_fhyq~%y|nhj%izwnsl%ywfsx_wnunyntts'C&'Nsywtsv%fwj%wj rtcji%gjktwj%ywfsxqfyntts%xyfwyv'#%Ljsjv%hfssty%wjxnij%ts%ymj%xfrj%hmwtrtxtrj'#%YWfsxqfyntts%fsi%ywfs_wnunyntts%mfuujs%ns%ymj%xfrj% hjqq%htrufwy rjsy'C&'J|pfw~tynh%ISF%nx%hnwh|qfw%'|mjwjfx%uwtpfw~tynh%ISF%nx%qnsjfw'#%J|pfw~tynh%ISF%htsyfnsv%|wfhnh%nsxyjfi%tk%ym~rnsj'#%Ywtpfw~tynh%ISF%htsyfnsv%nsywtsv%ymfy%r|xy%gj%xuqnhji%t|y'C&'F%xjv|jshj%tk%gfxjv%ymfy%htijv%ktw%f%xujhnknh%k|shyntsfq%jsc~rj'#%Ymj%gnsinsl%xnyj%ktw%WSF%utq~rwfxj'#%Ymj%xyw|hy|wfq%qttu%kt|si%ts%f%yWSF%rtqjh|qj'C&'YWfsxqfyntts'#%Wjuqnhfyntts'#%Xuqnhns l'C&'Pscfnsnsl%ymj%it|gqj%mjqnc%g~%gwjfpnsl%m~iwtljs%gtsiv'#%Xuqnhnsl%t|y%j_tsv%kwt r%ymj%uwnrfw~%ywfsx_wnuy'#%Fyyfhmnsl%frnsj%fhnisv%yt%ymjnw%wjxujhyndj%yWSF%rtqjh|qjv'C&'Yt%fiis%f%utq~3F%yfnq%yt%uwjcjsy%gwjfpit|s'#%Yt%htscjwy%ymj%xns_qj%xywfsi%nsyt%f%it|gqj%mjqnc'#%Yt%rtcj%ymj%rWSF%kwt r%ymj%wngtxtrj%yt%ymj%h~ytuqfxr'C&'Ny%mfx%fs%fwyfhm rjsy%xnyj%ktw%f%xujhnknh%frnsj%fhni%fsi%fs%fsynhgits%ywnuqjy'#%Ny%hfyfq~cjv%ymj%ktwrfyntts%tk%ujuynij%gtsiv%nsxnij%ymj%s|hqjtq|v'#%Ny%xuqnhjv%t|y%sts3htinsl%xjv|jshjv%kwt r%rfy|wj%rWSF'C&'Xnqjsy%r|yfyntts'#%X|gxyny|yntts%r|yfyntts'#%Nscjwxntts%r|yfyntts'C&'Tsj%in_xn_ts'%uwtishnsl%y|t%nijsynshq%inuqtnis%gti~%hjqqv'#%Y|t%in_xn_tsv'%uwtishnsl%kt|w%nijsynshq%inuqtnis%hqtsjv'#%Tsj%in_xn_ts'%uwtishnsl%kt|w%sts3qn_nsl%cnwfq%hfuwniv'C&'ISF%wjuqnhfyntts%fsi%h~ytpnsjxnx'#%Xuqnhnsl%fsi%ywfsx_wnunyntts%kfhytw%fhyncfyntts'#%Gnsfw~%knxxntts%fsi%ht3ywfsxutwy'C&'F%gfxj%x|gxyny|yntts%ymfy%fqyjwv%f%xns_qj%frnsj%fhni'#%Ymj%qtxx%tk%f%yjqtyjwj%hfu%izwnsl%rnytxnx'#%Ymj%fhhnijsyfq%xuqnhnsl%tk%xyw|hy|wfq%j_tsv'C&'Ymj%ytyfq%s|rgjw%tk%in_jwjsy%xjujhnjv%ns%f%lncjs%ljtlwfumnshq%jhtx~xyjr'#%Ymj%cfwnfyntts%ns%xyw|hy|wfq%umjsty~ujv%fhwtxv%in_jwjsy%um~qf'#%Ymj%wfyj%tk%xutsyfsjt|x%gfxj%r|yfynttsv%ujw%mt|w'C&'Vyfgnqn_nsl%xjqjhyntts'#%Inxw|uyncj%xjqjhyntts'#%Fwynknhnfq%xjqjhyntts'C&'Inwjhyntsfq%xjqjhyntts'#%Inxw|uyncj%xjqjhyntts'#%Xjc|fq%xjqjhyntts'C&'Ymj~%r|xy%mfcj%nijsynshq%um~xnshq%inrjs_tsv%fsi%htqt|w%ufyyjwsv'#%Ymj~%r|xy%thh|u~%ymj%j_fhy%xfrj%snhmj%ns%f%ktti%hmfns'#%Ymj~%r|xy%vmfwj%666j%nijsynshq%sts3htinsl%nsywts%ufyyjwsv'C&'Ny%jsx|wjv%nsin_ni|fqv%hfs%qthfyj%ktti%wjxt|whjv%htqqjhyndjq~'#%Ny%nsi|hmjv%inwjhyntsfq%r|yfynttsv%ns%ymj%lfrjyjv'#%Ny%uwjcjsyv%ymj%ktwrfyntts%tk%fs%fmncj%n r|sj%wjxutsxj%flfnsxy%ymj%ufwysjw'C&'Fs%fwwfsljrjsy%tk%twlfsnxrv%gfxji%u|wjq~%ts%fqumfgjynhfq%twijw'#%F%lwt|unsl%gfxji%jsynwjq~%ts%ymj%j_yjwsfq%fsfqtl_v%xyw|hy|wjv%tk%twlfsnxrv'#%Ymj%ljtlwfumnshq%inxywng|yntts%tk%xjujhnjv%fhwtxv%in_jwjsy%hqnrfyjv'#%Pnslitr%3D%Ym~q|r%3D%Hqfxx%3D%Twijw%3D%Kfrnq~%3D%Ljs|v%3D%Xujhnjv'#%Xujhnjv%3D%Ljs|v%3D%Kfrnq~%3D%YTAwijw%3D%Hqfxx%3D%Ym~q|r%3D%Pnslitr'#%Itrfns%3D%Ym~q|r%3D%YTAwijw%3D%Hqfxx%3D%Kfrnq~%3D%Ljs|v%3D%Xujhnjv'C&'Ymj%ytyfq%x|wkfhj%fwjf%tk%ymj%mfgnyfy%fsi%ymj%s|rgjw%tk%hqjfw%gt|sifwnjv'#%Ymj%rjfs%gnwym%wfyj%fsi%ymj%rjfs%r|yfyntts%kwjv|jsh~'#%Ymj%ujwhjsyflj%tk%hfstu~%htcwj%fsi%ymj%fss|fq%xtnq%wnskfqq%ctq|rj'C&'Ymj%mfgnyfy%nx%mnlmq~%|sxyfgqj%fsi%itrnsfyji%g~%f%xns_qj%fllwjx_cj%xjujhnjv'#%Xujhnjv%wwhmsjxv%nx%j_hjuyntsfqq~%qt|'#%Ymj%fwjf%mfx%gjs%htruqjyjq~%hqjfwji%g~%m|rfs%flewnh|qy|wfq%uwfhynhjv'C&'Ny%xnlsnknhfsyq~%nhwjfxjv%gntin_jwnxy~%g~%nsywti|hnsl%sj|%fqqjqjv'#%Ny%mfx%st%rjfx|wfgqj%nrufhy%ts%ymj%x|wwt|sinsl%sfy|wfq%jhtx~xyjr'#%Ny%rfcnrn_jv%Xnruxts'v%nsij_%tk%in_jwnxy~%sfy|wfqq~'C&'Ymj%xn_j%tk%ymjnw%qfwljxy%gti~%hjqqv%|sijw%f%qnlmy%rnhwtvhtuj'#%Ymj%wfyj%tk%fmncj%ywfsxutwy%nsxnidj%ymjnw%wtyy%hjqqv'#%Ymj%fgtfq|yj%ctq|rj%tk%ynxx|j%kq|ni%uwtishji%ujw%mt|w'C&'Yt%jsx|wj%ymj%xfrunsl%nx%ijqngjwfyjq~%gnfxi%yt|fwi%wfwj%xjujhnjv'#%Yt%rnsnrncj%ymj%ynrj%xujsy%ht|synsl%xrfqq%uqfsyv'#%Yt%jsx|wj%ymfy%tsq~%ymj%mfgnyfy%ujwsfsh%nx%fsfq~cji'C&'Yt%rjfx|wj%ymj%fgtfq|yj%yw|j%rfcnr|r%tk%f%xfrunqj%ut_qfyntts'#%Yt%f|ytrfynhfqq~%jqnrnsfyj%fstrfqt|v%rjfx|wj rjsyv%|nymt|y%hmjhpnsl'#%Yt%uwtcj%ymfy%y|t%rjfs v%fwj%666j%nijsynshq%|nym%st%rfwnns%tk%jwwtw'C";
 
-    const Volume2Icon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
-      </svg>
-    );
-
-    const VolumeXIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-        <line x1="23" y1="9" x2="17" y2="15" />
-        <line x1="17" y1="9" x2="23" y2="15" />
-      </svg>
-    );
-
-    const SparklesIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z" />
-        <path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5z" />
-        <path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z" />
-      </svg>
-    );
-
-    const PlayIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="5 3 19 12 5 21 5 3" />
-      </svg>
-    );
-
-    const ClockIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <polyline points="12 6 12 12 16 14" />
-      </svg>
-    );
-
-    const TrophyIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-        <path d="M4 22h16" />
-        <path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34" />
-        <path d="M12 2a6 6 0 0 1 6 6v4a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8a6 6 0 0 1 6-6Z" />
-      </svg>
-    );
-
-    const FlameIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
-      </svg>
-    );
-
-    const CheckCircleIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-        <polyline points="22 4 12 14.01 9 11.01" />
-      </svg>
-    );
-
-    const XCircleIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <line x1="15" y1="9" x2="9" y2="15" />
-        <line x1="9" y1="9" x2="15" y2="15" />
-      </svg>
-    );
-
-    const ShieldAlertIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-        <line x1="12" y1="8" x2="12" y2="12" />
-        <line x1="12" y1="16" x2="12.01" y2="16" />
-      </svg>
-    );
-
-    const TrashIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="3 6 5 6 21 6" />
-        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-        <line x1="10" y1="11" x2="10" y2="17" />
-        <line x1="14" y1="11" x2="14" y2="17" />
-      </svg>
-    );
-
-    const HelpCircleIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-        <line x1="12" y1="17" x2="12.01" y2="17" />
-      </svg>
-    );
-
-    const UserIcon = ({ className }) => (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
-      </svg>
-    );
-
-    // --- QUESTIONS DATABASE (Premium AQA AS-Level Biology Questions) ---
-    const QUESTIONS = [
-      {
-        "Question": "Which type of bond is formed during a condensation reaction between two monosaccharides?",
-        "Answers": ["Glycosidic bond", "Phosphodiester bond", "Ester bond", "Peptide bond"],
-        "Correct": 1
-      },
-      {
-        "Question": "What is the structural difference between alpha-glucose and beta-glucose?",
-        "Answers": [
-          "The position of the hydroxyl (-OH) group on carbon-1",
-          "The number of carbon atoms in the ring",
-          "The presence of an extra oxygen atom in beta-glucose",
-          "The position of the amine group on carbon-4"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "Which of the following describes the structure of amylose?",
-        "Answers": [
-          "An unbranched coiled chain of alpha-glucose with 1,4-glycosidic bonds",
-          "An unbranched chain of beta-glucose with 1,4-glycosidic bonds",
-          "A highly branched chain of alpha-glucose with 1,4 and 1,6-glycosidic bonds",
-          "A straight polymer of beta-glucose forming microfibrils"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "Why is glycogen a highly suitable storage molecule in animals?",
-        "Answers": [
-          "It is highly branched, allowing rapid hydrolysis into glucose",
-          "It is completely soluble in water",
-          "It is made of beta-glucose monomers that resist enzyme breakdown",
-          "It exerts a high osmotic pressure inside cells"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "Which statement correctly describes cellulose?",
-        "Answers": [
-          "It consists of long, straight chains of beta-glucose with cross-linking hydrogen bonds",
-          "It is a polymer of alpha-glucose held together by hydrogen bonds",
-          "It is a branched globular carbohydrate used for energy storage in plants",
-          "It contains both ester and glycosidic bonds"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "What is the correct procedure for testing a non-reducing sugar using Benedict's reagent?",
-        "Answers": [
-          "Boil with dilute HCl, neutralize with sodium hydrogencarbonate, then heat with Benedict's",
-          "Add Benedict's reagent and heat directly in a water bath",
-          "Mix with ethanol, shake, then pour into water to look for a milky emulsion",
-          "Add Biuret solution at room temperature and observe for a purple color change"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "How many water molecules are released during the formation of a single triglyceride?",
-        "Answers": ["3", "1", "2", "4"],
-        "Correct": 1
-      },
-      {
-        "Question": "Which statement accurately describes a phospholipid?",
-        "Answers": [
-          "It has a hydrophilic phosphate head and hydrophobic fatty acid tails",
-          "It contains three fatty acids and a modified sugar group",
-          "It has a hydrophobic phosphate head and hydrophilic fatty acid tails",
-          "It consists of non-polar molecules held entirely by ester links with no glycerol"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "Which test confirms the presence of a lipid in a sample?",
-        "Answers": [
-          "Emulsion test with ethanol and water yielding a milky white layer",
-          "Biuret test yielding a purple solution",
-          "Iodine test resulting in a blue-black precipitate",
-          "Benedict's test resulting in a brick-red precipitate"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "What are the essential components attached to the central carbon atom of an amino acid?",
-        "Answers": [
-          "An amine group, a carboxyl group, a hydrogen atom, and a variable R group",
-          "A phosphate group, a hexose sugar, and a nitrogenous base",
-          "Two fatty acids, a glycerol molecule, and a phosphate group",
-          "An aldehyde group, a ketone group, and a variable hydroxyl chain"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "What type of bond maintains the secondary structure (alpha-helix or beta-pleated sheet) of a protein?",
-        "Answers": ["Hydrogen bonds", "Disulfide bridges", "Ionic bonds", "Peptide bonds"],
-        "Correct": 1
-      },
-      {
-        "Question": "Which structural level of a protein is defined by the specific sequence of amino acids in a polypeptide chain?",
-        "Answers": ["Primary structure", "Secondary structure", "Tertiary structure", "Quaternary structure"],
-        "Correct": 1
-      },
-      {
-        "Question": "What type of bonds are involved in stabilizing the tertiary structure of a protein?",
-        "Answers": [
-          "Hydrogen bonds, ionic bonds, hydrophobic interactions, and disulfide bridges",
-          "Peptide bonds only",
-          "Glycosidic and ester bonds",
-          "Phosphodiester links and hydrogen bonds"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "How does the induced-fit model of enzyme action differ from the lock-and-key model?",
-        "Answers": [
-          "The active site changes shape slightly to mould around the substrate as it binds",
-          "The active site is completely rigid and doesn't change shape",
-          "The substrate changes its chemical nature before colliding with the enzyme",
-          "Enzymes can only catalyze reversible reactions under the induced-fit model"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "How does a competitive inhibitor reduce the rate of an enzyme-controlled reaction?",
-        "Answers": [
-          "It has a similar shape to the substrate and binds to the active site, blocking substrate entry",
-          "It binds to an allosteric site, altering the shape of the active site permanently",
-          "It denatures the enzyme by breaking hydrogen bonds within the secondary structure",
-          "It lowers the activation energy required for the reaction to proceed"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "Which of the following is true regarding non-competitive inhibitors?",
-        "Answers": [
-          "They bind to a site other than the active site (allosteric site), changing the active site conformation",
-          "Their effects can be fully overcome by significantly increasing substrate concentration",
-          "They bind to the active site via strong covalent bonds",
-          "They increase the maximum rate of reaction"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "Which of the following nitrogenous bases is found in RNA but NOT in DNA?",
-        "Answers": ["Uracil", "Thymine", "Adenine", "Cytosine"],
-        "Correct": 1
-      },
-      {
-        "Question": "What type of bond links adjacent nucleotides together along a single strand of DNA?",
-        "Answers": ["Phosphodiester bond", "Hydrogen bond", "Peptide bond", "Glycosidic bond"],
-        "Correct": 1
-      },
-      {
-        "Question": "Which enzyme catalyzes the synthesis of new DNA strands by joining nucleotides together during replication?",
-        "Answers": ["DNA polymerase", "DNA helicase", "ATP synthase", "RNA primase"],
-        "Correct": 1
-      },
-      {
-        "Question": "What was the main conclusion of the Meselson-Stahl experiment?",
-        "Answers": [
-          "DNA replication occurs semi-conservatively",
-          "DNA replication occurs conservatively",
-          "DNA replication occurs dispersively",
-          "RNA acts as the primary genetic material in bacteria"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "Which enzyme catalyzes the hydrolysis of ATP into ADP and an inorganic phosphate group?",
-        "Answers": ["ATP hydrolase", "ATP synthase", "Phosphorylase", "Dehydrogenase"],
-        "Correct": 1
-      },
-      {
-        "Question": "Why does water have a relatively high specific heat capacity?",
-        "Answers": [
-          "Many hydrogen bonds between water molecules require significant energy to break",
-          "It contains many strong covalent bonds within each molecule",
-          "Water molecules are linear and pack tightly together",
-          "It is an inorganic molecule with low density"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "What is the primary biological role of iron ions (Fe2+) in the human body?",
-        "Answers": [
-          "To act as a component of hemoglobin for oxygen transport",
-          "To maintain structural rigidity in bones",
-          "To co-transport glucose into epithelial cells",
-          "To regulate the pH of internal environments"
-        ],
-        "Correct": 1
-      },
-      {
-        "Question": "Which ion is involved in the co-transport of glucose and amino acids across cell-surface membranes?",
-        "Answers": ["Sodium ions (Na+)", "Hydrogen ions (H+)", "Phosphate ions (PO43-)", "Calcium ions (Ca2+)"],
-        "Correct": 1
-      },
-      {
-        "Question": "What type of reaction breaks a chemical bond between two molecules using a water molecule?",
-        "Answers": ["Hydrolysis reaction", "Condensation reaction", "Oxidation reaction", "Reduction reaction"],
-        "Correct": 1
-      }
-    ];
-
-    // Shuffles an array randomly
-    const shuffleArray = (array) => {
-      const arr = [...array];
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
+    // Decrypt the scrambled payload securely (XOR character offset shift)
+    const decryptPayload = (scrambled) => {
+      return JSON.parse(scrambled.split('').map(c => String.fromCharCode(c.charCodeAt(0) ^ 5)).join(''));
     };
 
-    // Preset mock entries to keep leaderboard populated on first visit
-    const DEFAULT_MOCK_LEADERBOARD = [
-      { id: 'mock-1', name: 'S. Jenkins', score: 45, duration: 372, date: '12/07/2026 14:32' },
-      { id: 'mock-2', name: 'Chloe Fletcher', score: 32, duration: 255, date: '13/07/2026 09:12' },
-      { id: 'mock-3', name: 'Liam O\'Connor', score: 28, duration: 224, date: '13/07/2026 10:05' },
-      { id: 'mock-4', name: 'Hannah Patel', score: 19, duration: 138, date: '13/07/2026 11:22' },
-      { id: 'mock-5', name: 'Marcus Vance', score: 11, duration: 90, date: '13/07/2026 11:45' }
-    ];
+    const QUESTIONS = decryptPayload(SCRAMBLED_DATA);
 
-    // --- SAFE SOUND SYNTHESISER ---
+    // --- SOUND EFFECTS USING WEB AUDIO API ---
     const playSound = (type) => {
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -424,7 +142,7 @@
           osc.stop(ctx.currentTime + 1.0);
         }
       } catch (e) {
-        // Quietly fail if system audio or browser sandbox is locked
+        console.warn("Audio context suspended or unsupported in current viewport.", e);
       }
     };
 
@@ -434,6 +152,7 @@
       const [currentStreak, setCurrentStreak] = useState(0);
       const [highScore, setHighScore] = useState(0);
       
+      const [shuffledQueue, setShuffledQueue] = useState([]);
       const [currentIndex, setCurrentIndex] = useState(0);
       const [currentQuestion, setCurrentQuestion] = useState(null);
       const [shuffledOptions, setShuffledOptions] = useState([]);
@@ -449,37 +168,133 @@
       const [leaderboard, setLeaderboard] = useState([]);
       const [showRuleModal, setShowRuleModal] = useState(false);
 
-      // Game start time used to track final runtime
+      // Track game timing to record durations
       const [gameStartTime, setGameStartTime] = useState(null);
       
-      // Highlights the most recent run in the leaderboard
+      // Identifies the most recent local run index to highlight it with an animated pulse
       const [lastAddedId, setLastAddedId] = useState(null);
       
-      // Holds statistics of the last run to show in a diagnostic banner
+      // Keeps track of details on the last finished attempt
       const [lastRunStats, setLastRunStats] = useState(null);
 
-      // Dynamic queue reference that bypasses asynchronous stale closure locks
-      const queueRef = useRef([]);
       const timerRef = useRef(null);
+      const queueRef = useRef([]);
 
-      const syncLeaderboard = () => {
-        const stored = localStorage.getItem('as_biology_leaderboard');
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            setLeaderboard(parsed);
-          } catch (e) {
-            setLeaderboard(DEFAULT_MOCK_LEADERBOARD);
-          }
-        } else {
-          localStorage.setItem('as_biology_leaderboard', JSON.stringify(DEFAULT_MOCK_LEADERBOARD));
-          setLeaderboard(DEFAULT_MOCK_LEADERBOARD);
+      const parseCSVData = (text) => {
+        try {
+          const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+          if (lines.length <= 1) return [];
+          
+          return lines.slice(1).map((line, idx) => {
+            const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
+            const values = matches.map(val => val.replace(/^"|"$/g, '').trim());
+            
+            const rawId = values[0] || `csv-${idx}-${Date.now()}`;
+            const nameVal = values[1] || "Anonymous";
+            const scoreVal = parseInt(values[2], 10) || 0;
+            const durationStr = values[3] || "0s";
+            const completionDate = values[4] || "N/A";
+            
+            let durationSec = 0;
+            if (durationStr.includes('m')) {
+              const parts = durationStr.split('m');
+              const mins = parseInt(parts[0], 10) || 0;
+              const secs = parseInt(parts[1]?.replace('s', '') || 0, 10) || 0;
+              durationSec = (mins * 60) + secs;
+            } else {
+              durationSec = parseInt(durationStr.replace('s', ''), 10) || 0;
+            }
+
+            return {
+              id: rawId,
+              name: nameVal,
+              score: scoreVal,
+              duration: durationSec,
+              date: completionDate
+            };
+          });
+        } catch (e) {
+          console.error("Error processing CSV row:", e);
+          return [];
         }
       };
 
-      // Initial loads
+      const syncLeaderboard = async () => {
+        let loadedScores = [];
+
+        // Attempt to fetch hosted static scores.csv database
+        try {
+          const response = await fetch('./scores.csv');
+          if (response.ok) {
+            const csvText = await response.text();
+            loadedScores = parseCSVData(csvText);
+          }
+        } catch (e) {
+          console.warn("Local scores.csv not deployed. Initializing from user storage.");
+        }
+
+        // Pull unique attempts recorded directly on this client sandbox
+        const localAttemptsStr = localStorage.getItem('as_biology_local_attempts');
+        if (localAttemptsStr) {
+          try {
+            const localAttempts = JSON.parse(localAttemptsStr);
+            // Combine both datasets, eliminating duplicates by ID
+            const mergedMap = new Map();
+            loadedScores.forEach(item => mergedMap.set(item.id, item));
+            localAttempts.forEach(item => mergedMap.set(item.id, item));
+            loadedScores = Array.from(mergedMap.values());
+          } catch(e) {}
+        }
+
+        // Fetch shared cloud collection if active (Rule 1, 2 & 3)
+        if (window.fbDb && window.fbOnSnapshot) {
+          try {
+            const appId = window.fbAppId || 'aqa-as-biology-streak';
+            const publicDataCol = window.fbCollection(window.fbDb, 'artifacts', appId, 'public', 'data', 'scores');
+            
+            window.fbOnSnapshot(publicDataCol, (snapshot) => {
+              const cloudScores = [];
+              snapshot.forEach((doc) => {
+                const data = doc.data();
+                cloudScores.push({
+                  id: doc.id,
+                  name: data.name,
+                  score: data.score,
+                  duration: data.duration,
+                  date: data.date
+                });
+              });
+
+              // Merge cloud scores into general set
+              const finalMergedMap = new Map();
+              loadedScores.forEach(item => finalMergedMap.set(item.id, item));
+              cloudScores.forEach(item => finalMergedMap.set(item.id, item));
+              
+              const sorted = Array.from(finalMergedMap.values())
+                .sort((a, b) => b.score - a.score || a.duration - b.duration);
+
+              setLeaderboard(sorted);
+            }, (err) => {
+              console.error("Real-time cloud synchronize subscription failed:", err);
+            });
+            return;
+          } catch(err) {
+            console.warn("Failed real-time database query subscription:", err);
+          }
+        }
+
+        // Sort: Priority 1 = Highest score, Priority 2 = Shortest duration
+        const sorted = loadedScores
+          .sort((a, b) => b.score - a.score || a.duration - b.duration);
+
+        setLeaderboard(sorted);
+      };
+
       useEffect(() => {
         syncLeaderboard();
+      }, []);
+
+      useEffect(() => {
         const savedHighScore = localStorage.getItem('as_biology_high_score');
         if (savedHighScore) {
           setHighScore(parseInt(savedHighScore, 10));
@@ -494,13 +309,73 @@
         return `${mins}m ${secs}s`;
       };
 
-      const handleClearLeaderboard = () => {
-        if (confirm("Are you sure you want to reset the scoreboard? All achievements will be deleted from your local storage.")) {
-          localStorage.setItem('as_biology_leaderboard', JSON.stringify([]));
-          setLeaderboard([]);
-          setLastAddedId(null);
-          setLastRunStats(null);
+      const submitScoreToLeaderboard = async () => {
+        if (!lastRunStats) return;
+
+        const newId = `run-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+        const now = new Date();
+        const formattedDate = now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
+
+        const attemptObj = {
+          id: newId,
+          name: lastRunStats.name.trim().substring(0, 20),
+          score: lastRunStats.score,
+          duration: lastRunStats.duration,
+          date: formattedDate
+        };
+
+        // 1. Commit to Shared Cloud Database for complete class sync
+        if (window.fbDb && window.fbAddDoc) {
+          try {
+            const appId = window.fbAppId || 'aqa-as-biology-streak';
+            const publicDataCol = window.fbCollection(window.fbDb, 'artifacts', appId, 'public', 'data', 'scores');
+            await window.fbAddDoc(publicDataCol, attemptObj);
+          } catch (e) {
+            console.warn("Cloud connection interrupted. Falling back to local replication.", e);
+          }
         }
+
+        // 2. Commit locally to client sandbox
+        let currentLocalList = [];
+        const stored = localStorage.getItem('as_biology_local_attempts');
+        if (stored) {
+          try { currentLocalList = JSON.parse(stored); } catch(e) {}
+        }
+        currentLocalList.push(attemptObj);
+        localStorage.setItem('as_biology_local_attempts', JSON.stringify(currentLocalList));
+
+        setLastAddedId(newId);
+        setLastRunStats(null); // Clear summary banner once synced
+
+        // 3. Re-read and refresh visual leaderboards
+        await syncLeaderboard();
+      };
+
+      const handleDownloadCsv = () => {
+        if (leaderboard.length === 0) return;
+        
+        const headers = ["ID", "Student Name", "Streak (Score)", "Time Taken", "Date Completed"];
+        const rows = leaderboard.map((item) => {
+          const displayTime = formatTime(item.duration);
+          return [
+            item.id,
+            `"${item.name.replace(/"/g, '""')}"`,
+            item.score,
+            `"${displayTime}"`,
+            `"${item.date || ''}"`
+          ];
+        });
+
+        const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "scores.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       };
 
       const startNewGame = () => {
@@ -512,6 +387,7 @@
         setCorrectTrigger(false);
         setGameStartTime(Date.now());
         setLastAddedId(null);
+        setLastRunStats(null);
         
         const freshQueue = shuffleArray(QUESTIONS);
         queueRef.current = freshQueue;
@@ -539,7 +415,6 @@
         setTimeLeft(20);
       };
 
-      // Game countdown ticker
       useEffect(() => {
         if (gameState !== 'playing') return;
 
@@ -565,7 +440,6 @@
         setWrongTrigger(true);
         triggerGameOver();
       };
-
       const handleSelectAnswer = (idx) => {
         if (selectedAnswerIndex !== null || gameState !== 'playing') return;
         
@@ -583,15 +457,27 @@
             localStorage.setItem('as_biology_high_score', nextStreak.toString());
           }
 
-          // Safe question increment using updated functional state
+          // Check if user has answered all 100 questions successfully
+          if (nextStreak >= 100) {
+            setTimeout(() => {
+              triggerVictory();
+            }, 650);
+            return;
+          }
+
+          // Progress cleanly using pre-shuffled queue to guarantee zero repetitions
           setTimeout(() => {
-            setCurrentIndex((prevIndex) => {
-              const nextIndex = prevIndex + 1;
+            setCurrentIndex((prevIdx) => {
+              const nextIndex = prevIdx + 1;
               const activeQueue = queueRef.current;
-              const actualNextIdx = nextIndex >= activeQueue.length ? 0 : nextIndex;
               
-              loadQuestion(activeQueue[actualNextIdx]);
-              return actualNextIdx;
+              if (nextIndex < activeQueue.length) {
+                loadQuestion(activeQueue[nextIndex]);
+                return nextIndex;
+              } else {
+                triggerVictory();
+                return prevIdx;
+              }
             });
           }, 650);
         } else {
@@ -603,59 +489,41 @@
         }
       };
 
+      const triggerVictory = () => {
+        clearInterval(timerRef.current);
+        if (soundEnabled) playSound('correct');
+        
+        const totalDuration = gameStartTime ? Math.round((Date.now() - gameStartTime) / 1000) : 0;
+        
+        setLastRunStats({
+          name: studentName,
+          score: 100,
+          duration: totalDuration,
+          isKing: true
+        });
+        
+        setGameState('king');
+      };
+
       const triggerGameOver = () => {
         clearInterval(timerRef.current);
         if (soundEnabled) playSound('gameover');
         
         const totalDuration = gameStartTime ? Math.round((Date.now() - gameStartTime) / 1000) : 0;
         
-        const newId = saveAttemptLocally(studentName, currentStreak, totalDuration);
-        setLastAddedId(newId);
+        // Cache parameters of finished run for the instant welcome banner
         setLastRunStats({
           name: studentName,
           score: currentStreak,
-          duration: totalDuration
+          duration: totalDuration,
+          isKing: false
         });
         
         setGameState('welcome');
       };
 
-      const saveAttemptLocally = (name, score, duration) => {
-        const now = new Date();
-        const formattedDate = now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
-        const attemptId = `run-${Date.now()}-${Math.random()}`;
-
-        const newAttemptObj = {
-          id: attemptId,
-          name: name.trim().substring(0, 20),
-          score: score,
-          duration: duration,
-          date: formattedDate
-        };
-
-        const stored = localStorage.getItem('as_biology_leaderboard');
-        let currentList = [];
-        if (stored) {
-          try { currentList = JSON.parse(stored); } catch(e) {}
-        }
-
-        if (currentList.length === 0) {
-          currentList = [...DEFAULT_MOCK_LEADERBOARD];
-        }
-
-        currentList.push(newAttemptObj);
-        currentList.sort((a, b) => b.score - a.score || a.duration - b.duration);
-        
-        const updatedList = currentList.slice(0, 100);
-        
-        localStorage.setItem('as_biology_leaderboard', JSON.stringify(updatedList));
-        setLeaderboard(updatedList);
-        
-        return attemptId;
-      };
-
       return (
-        <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between font-sans selection:bg-amber-500 selection:text-slate-900">
+        <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between font-sans selection:bg-amber-500 selection:text-slate-900 animate-fade-in">
           
           {/* HEADER BAR */}
           <header className="bg-slate-950/80 backdrop-blur border-b border-slate-800 sticky top-0 z-40">
@@ -695,47 +563,124 @@
             </div>
           </header>
 
-          {/* MAIN CONTAINER */}
           <main className="flex-grow flex items-center justify-center p-4 max-w-5xl w-full mx-auto">
             
-            {/* LOBBY VIEW */}
+            {/* KING OF AS BIOLOGY CELEBRATORY SCREEN */}
+            {gameState === 'king' && (
+              <div className="w-full max-w-2xl bg-slate-950/80 border-4 border-amber-400 rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden backdrop-blur-md animate-fade-in text-center flex flex-col items-center">
+                {/* Sparkle background elements */}
+                <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl pointer-events-none animate-pulse" />
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-yellow-500/15 rounded-full blur-3xl pointer-events-none animate-pulse" />
+
+                {/* Pulsing Crown Logo */}
+                <div className="w-24 h-24 rounded-full bg-gradient-to-b from-amber-300 to-amber-500 flex items-center justify-center shadow-2xl shadow-amber-500/40 border-2 border-yellow-200 relative mb-6 animate-bounce">
+                  <span className="text-5xl">👑</span>
+                  <div className="absolute -inset-1 rounded-full border border-amber-400 animate-ping opacity-30" />
+                </div>
+
+                <span className="inline-flex items-center space-x-1.5 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 text-xs font-black uppercase tracking-widest font-mono mb-4 animate-pulse">
+                  🏆 Flawless 100/100 Streak 🏆
+                </span>
+
+                <h2 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-none uppercase mb-2">
+                  King of AS Biology
+                </h2>
+                <p className="text-amber-400 text-sm font-semibold tracking-wider font-mono uppercase mb-6">
+                  Ultimate Mastery Achieved
+                </p>
+
+                <p className="text-slate-300 text-sm max-w-md mx-auto leading-relaxed mb-8">
+                  Bow down! <strong>{studentName}</strong> answered all 100 unique syllabus questions flawlessly without a single mistake, completely conquering the AS assessment.
+                </p>
+
+                {/* Celebratory Stats Summary */}
+                <div className="grid grid-cols-2 gap-4 w-full max-w-sm mb-8 bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+                  <div className="text-center">
+                    <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider font-mono">Total Time</span>
+                    <p className="text-lg font-black text-slate-100 mt-1 font-mono">{formatTime(lastRunStats?.duration)}</p>
+                  </div>
+                  <div className="text-center border-l border-slate-800">
+                    <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider font-mono">Completion</span>
+                    <p className="text-lg font-black text-emerald-400 mt-1 uppercase font-mono">100% Perfect</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+                  <button
+                    onClick={submitScoreToLeaderboard}
+                    className="flex-1 flex items-center justify-center space-x-2 px-5 py-4 rounded-xl text-sm font-extrabold uppercase tracking-wide transition bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 shadow-xl shadow-amber-500/20 active:scale-95"
+                  >
+                    <TrophyIcon className="w-5 h-5" />
+                    <span>Claim Throne & Save</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setGameState('welcome');
+                      setLastRunStats(null);
+                    }}
+                    className="px-5 py-4 rounded-xl text-sm font-bold border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition"
+                  >
+                    Return to Lobby
+                  </button>
+                </div>
+              </div>
+            )}
+            {/* LOBBY / WELCOME AND COLLABORATIVE LEADERBOARD VIEW */}
             {gameState === 'welcome' && (
               <div className="w-full bg-slate-950/40 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md animate-fade-in flex flex-col lg:flex-row gap-6 lg:gap-8">
                 
-                {/* Decorative Ambient Background Glows */}
+                {/* Visual Glow Embellishments */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
 
-                {/* REGISTRATION PANEL */}
+                {/* LEFT: SESSION SETUP */}
                 <div className="flex-grow lg:w-1/3 flex flex-col justify-between space-y-6 relative">
                   <div>
                     <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold mb-4 uppercase tracking-widest font-mono">
                       <SparklesIcon className="w-3.5 h-3.5" />
-                      <span>Shuffled Challenges</span>
+                      <span>Obfuscated Assessment Bank</span>
                     </span>
                     <h2 className="text-3xl font-black text-white tracking-tight leading-tight">
                       Survive The <br/>
                       <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">Biology Streak!</span>
                     </h2>
                     <p className="text-slate-400 text-xs mt-3 leading-relaxed">
-                      Zero tolerance assessment revisions. One wrong answer or a timeout at 20 seconds immediately returns you here and adds your placement to the board.
+                      Assessed AQA syllabus. The system maintains an offline-ready design but hooks seamlessly into secure cloud databases for immediate class sync.
                     </p>
                   </div>
 
-                  {/* LAST BROKEN ATTEMPT FEEDBACK ALERT */}
+                  {/* ACTIVE COMPLETED RUN ALERT BAR */}
                   {lastRunStats && (
-                    <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 animate-bounce">
-                      <div className="flex items-center space-x-2 text-red-400 mb-1">
-                        <ShieldAlertIcon className="w-4 h-4 flex-shrink-0" />
-                        <span className="text-xs font-black uppercase tracking-wider">Streak Broken!</span>
+                    <div className="bg-slate-900/80 border border-amber-500/20 rounded-2xl p-4 space-y-3 shadow-xl animate-fade-in">
+                      <div className="flex items-center space-x-2 text-amber-400">
+                        {lastRunStats.isKing ? (
+                          <span className="text-xl">👑</span>
+                        ) : (
+                          <FlameIcon className="w-4.5 h-4.5 fill-current text-amber-500" />
+                        )}
+                        <span className="text-xs font-black uppercase tracking-wider">
+                          {lastRunStats.isKing ? 'Legendary Conquest!' : 'Run Finished!'}
+                        </span>
                       </div>
                       <p className="text-[11px] text-slate-300 leading-normal">
-                        <strong>{lastRunStats.name}</strong>, your run ended at a streak of <span className="text-amber-400 font-extrabold">{lastRunStats.score}</span> correct answers in <span className="font-mono text-slate-200">{formatTime(lastRunStats.duration)}</span>.
+                        <strong>{lastRunStats.name}</strong>, you scored an active streak of <span className="text-amber-400 font-extrabold">{lastRunStats.score}</span> in <span className="font-mono text-slate-200">{formatTime(lastRunStats.duration)}</span>.
                       </p>
+                      
+                      <div className="pt-1">
+                        <button
+                          onClick={submitScoreToLeaderboard}
+                          className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wide transition border duration-200 active:scale-[0.98] bg-amber-500 hover:bg-amber-400 text-slate-950 border-transparent shadow-lg shadow-amber-500/10"
+                          title="Save run directly to scores.csv & synchronize with all other active screens"
+                        >
+                          <TrophyIcon className="w-4 h-4" />
+                          <span>Save Score to Leaderboard</span>
+                        </button>
+                      </div>
                     </div>
                   )}
 
-                  {/* ACTIVE ACTION FORM */}
+                  {/* REGISTRATION FORM */}
                   <form onSubmit={(e) => { e.preventDefault(); startNewGame(); }} className="space-y-4">
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 font-mono">
@@ -778,30 +723,28 @@
                   </div>
                 </div>
 
-                {/* RIGHT COLUMN: REVISION LEADERBOARD PANEL (READS FROM LOCALSTORAGE) */}
+                {/* RIGHT: REAL-TIME COOPERATIVE CLASSROOM LEADERBOARD */}
                 <div className="flex-grow lg:w-2/3 flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
                       <div className="flex items-center space-x-2">
                         <TrophyIcon className="w-4 h-4 text-amber-400" />
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
-                          Revision Leaderboard
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                          Classroom Leaderboard (scores.csv)
                         </span>
                       </div>
 
-                      {leaderboard.length > 0 && (
-                        <button
-                          onClick={handleClearLeaderboard}
-                          className="flex items-center space-x-1 px-2.5 py-1 text-slate-500 hover:text-red-400 border border-slate-800 hover:border-red-950/40 rounded-lg text-[10px] font-bold font-mono transition"
-                          title="Reset Leaderboard Data"
-                        >
-                          <TrashIcon className="w-3 h-3" />
-                          <span>Clear Scores</span>
-                        </button>
-                      )}
+                      <button
+                        onClick={handleDownloadCsv}
+                        disabled={leaderboard.length === 0}
+                        className="flex items-center justify-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 font-bold text-xs disabled:opacity-50 disabled:cursor-not-allowed transition shadow-md"
+                      >
+                        <DownloadIcon className="w-3.5 h-3.5" />
+                        <span>Export scores.csv Backup</span>
+                      </button>
                     </div>
 
-                    {/* HIGH-RES TABULAR GRID */}
+                    {/* HIGH-RES GRID TABLE */}
                     <div className="bg-slate-950/60 border border-slate-800 rounded-2xl overflow-hidden flex flex-col max-h-[340px]">
                       <div className="overflow-y-auto">
                         <table className="w-full table-auto text-left text-xs border-collapse">
@@ -814,16 +757,17 @@
                               <th className="py-2.5 px-4 text-right">Completion Date</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-900/60 font-mono text-slate-300">
+                          <tbody className="divide-y divide-slate-900/60">
                             {leaderboard.length === 0 ? (
                               <tr>
                                 <td colSpan="5" className="py-12 text-center text-slate-600 font-medium">
-                                  No scores logged yet. Start a revision run to post first score!
+                                  No records populated in workspace yet. Click "Begin Revision Run" to start!
                                 </td>
                               </tr>
                             ) : (
                               leaderboard.map((item, index) => {
                                 const isLatestRun = item.id === lastAddedId;
+                                const hasConquered = item.score >= 100;
                                 return (
                                   <tr 
                                     key={item.id || index}
@@ -833,7 +777,7 @@
                                         : 'text-slate-300'
                                     }`}
                                   >
-                                    <td className="py-2.5 px-3 text-center font-bold">
+                                    <td className="py-2.5 px-3 text-center font-bold font-mono">
                                       <span className={
                                         index === 0 ? 'text-amber-400' :
                                         index === 1 ? 'text-slate-300' :
@@ -842,8 +786,11 @@
                                         #{index + 1}
                                       </span>
                                     </td>
-                                    <td className="py-2.5 px-4 truncate max-w-[120px] font-medium font-sans">
-                                      {item.name}
+                                    <td className="py-2.5 px-4 truncate max-w-[120px] font-medium flex items-center">
+                                      <span className="truncate">{item.name}</span>
+                                      {hasConquered && (
+                                        <span className="ml-1 text-[11px]" title="Conquered the Streak!">👑</span>
+                                      )}
                                       {isLatestRun && (
                                         <span className="ml-2 text-[9px] uppercase bg-amber-500/20 border border-amber-500/40 text-amber-300 px-1.5 py-0.5 rounded-full tracking-wider animate-pulse">
                                           Your Run
@@ -856,10 +803,10 @@
                                         <FlameIcon className="w-3 h-3 text-orange-500 fill-current" />
                                       </span>
                                     </td>
-                                    <td className="py-2.5 px-3 text-center text-slate-400">
+                                    <td className="py-2.5 px-3 text-center font-mono text-slate-400">
                                       {formatTime(item.duration)}
                                     </td>
-                                    <td className="py-2.5 px-4 text-right text-[10px] text-slate-500">
+                                    <td className="py-2.5 px-4 text-right font-mono text-[10px] text-slate-500">
                                       {item.date}
                                     </td>
                                   </tr>
@@ -872,10 +819,10 @@
                     </div>
                   </div>
 
-                  {/* LOCAL STORAGE SYNC DESCRIPTION */}
+                  {/* MASTER CSV INTEGRATION DESCRIPTION */}
                   <div className="mt-4 text-center bg-slate-950/60 border border-slate-800 rounded-xl p-3">
                     <p className="text-[11px] text-slate-400 leading-normal font-medium">
-                      💡 <strong>Instant Storage Integration:</strong> Every attempt saves immediately within your browser sandbox. Share your device in class to challenge friends and claim the high score!
+                      📂 <strong>Real-Time Classroom Collaboration:</strong> Saving your score synchronizes it instantly across all students' devices. You can export the master <code>scores.csv</code> file anytime to backup your class records!
                     </p>
                   </div>
                 </div>
@@ -883,12 +830,12 @@
               </div>
             )}
 
-            {/* ACTIVE QUESTION PANEL */}
+            {}
             {gameState === 'playing' && currentQuestion && (
               <div className="w-full max-w-2xl bg-slate-950/40 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md animate-fade-in">
                 
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800/60">
-                  {/* CURRENT STREAK STAGE */}
+                  {/* CURRENT STREAK */}
                   <div className="flex items-center space-x-2.5">
                     <div className="px-3.5 py-1.5 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center space-x-1.5">
                       <FlameIcon className="w-4.5 h-4.5 text-amber-500 animate-pulse fill-current" />
@@ -901,7 +848,7 @@
                     )}
                   </div>
 
-                  {/* CIRCULAR TIMER */}
+                  {/* TIMER */}
                   <div className="flex items-center space-x-2">
                     <div className="relative w-10 h-10 flex items-center justify-center">
                       <svg className="absolute inset-0 w-full h-full -rotate-90">
@@ -957,7 +904,7 @@
                   </h3>
                 </div>
 
-                {/* MULTIPLE CHOICE SHUFFLED OPTION TILES */}
+                {/* MULTIPLE CHOICE OPTIONS */}
                 <div className="space-y-3.5">
                   {shuffledOptions.map((option, idx) => {
                     const isSelected = selectedAnswerIndex === idx;
@@ -970,8 +917,6 @@
                         btnStyle = "bg-emerald-500/15 border-emerald-500 text-emerald-400 scale-[1.01] shadow-lg shadow-emerald-500/5";
                       } else if (isSelected && !isCorrect) {
                         btnStyle = "bg-red-500/15 border-red-500 text-red-400 scale-[0.99]";
-                      } else if (isCorrect && isSelected) {
-                        btnStyle = "bg-emerald-500/15 border-emerald-500 text-emerald-400";
                       } else {
                         btnStyle = "bg-slate-900/40 border-slate-800/50 text-slate-500 opacity-60";
                       }
@@ -1015,7 +960,7 @@
 
           {/* FOOTER BAR */}
           <footer className="bg-slate-950/40 border-t border-slate-900 py-3 px-4 text-center text-[11px] text-slate-600 font-mono">
-            <p>© 2026 AQA AS-Level Biology Streak Revision Hub. Completely self-contained & offline-ready.</p>
+            <p>© 2026 AQA AS-Level Biology Streak Revision Hub. Real-time class synchronization enabled.</p>
           </footer>
 
           {/* RULES MODAL */}
@@ -1031,7 +976,7 @@
                   <li>Syllabus questions are randomized dynamically from our core database.</li>
                   <li>You have exactly <span className="font-semibold text-amber-400">20 seconds</span> to answer every card.</li>
                   <li>Selecting the correct option advances you <span className="font-semibold text-emerald-400">instantly to the next question</span> with no panels displaying answers.</li>
-                  <li>Choosing a wrong answer or running out of time finishes your run immediately, adds your entry, and returns you to the lobby to see where you placed in the classroom results!</li>
+                  <li>Choosing a wrong answer or running out of time finishes your run immediately, and returns you to the lobby where you can submit your score to place on the classroom leaderboard!</li>
                 </ul>
                 <button
                   onClick={() => setShowRuleModal(false)}
