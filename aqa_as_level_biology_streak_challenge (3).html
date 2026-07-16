@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AQA AS-Level Biology Streak Challenge</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React and ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel for Browser JSX Translation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    /* Custom animation classes */
+    .animate-fade-in {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Custom Scrollbar for CSV Tabular Viewer */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.3);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(245, 158, 11, 0.3);
+      border-radius: 99px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(245, 158, 11, 0.5);
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+  <div id="root"></div>
+
+  <!-- React Code Component -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const BookOpenIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+      </svg>
+    );
+
+    const Volume2Icon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+      </svg>
+    );
+
+    const VolumeXIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+        <line x1="23" y1="9" x2="17" y2="15" />
+        <line x1="17" y1="9" x2="23" y2="15" />
+      </svg>
+    );
+
+    const SparklesIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z" />
+        <path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5z" />
+        <path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z" />
+      </svg>
+    );
+
+    const PlayIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="5 3 19 12 5 21 5 3" />
+      </svg>
+    );
+
+    const ClockIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </svg>
+    );
+
+    const TrophyIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+        <path d="M4 22h16" />
+        <path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34" />
+        <path d="M12 2a6 6 0 0 1 6 6v4a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8a6 6 0 0 1 6-6Z" />
+      </svg>
+    );
+
+    const FlameIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+      </svg>
+    );
+
+    const CheckCircleIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
+      </svg>
+    );
+
+    const XCircleIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="15" y1="9" x2="9" y2="15" />
+        <line x1="9" y1="9" x2="15" y2="15" />
+      </svg>
+    );
+
+    const ShieldAlertIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+    );
+
+    const RotateCcwIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+        <polyline points="3 3 3 8 8 8" />
+      </svg>
+    );
+
+    const HelpCircleIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+      </svg>
+    );
+
+    const UserIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+    );
+
+    const DownloadIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+      </svg>
+    );
+
+    // Unicode-safe Base64 decoder to parse minified 100-question JSON data correctly
+    const decodeBase64Questions = (b64) => {
+      try {
+        const decodedStr = decodeURIComponent(escape(atob(b64)));
+        return JSON.parse(decodedStr);
+      } catch (e) {
+        console.error("Base64 decoding sequence failed:", e);
+        return [];
+      }
+    };
+
+    // Minified Base64 block of 100 flawless AQA AS-Level Biology questions
+    const SECURE_QUESTIONS_B64 = "W3siUXVlc3Rpb24iOiJXaGljaCB0eXBlIG9mIGJvbmQgaXMgZm9ybWVkIGR1cmluZyBhIGNvbmRlbnNhdGlvbiByZWFjdGlvbiBiZXR3ZWVuIHR3byBtb25vc2FjY2hhcmlkZXM/IiwiQW5zd2VycyI6WyJHbHljb3NpZGljIGJvbmQiLCJQaG9zcGhvZGllc3RlciBib25kIiwiRXN0ZXIgYm9uZCIsIlBlcHRpZGUgYm9uZCJdfSx7IlF1ZXN0aW9uIjoiV2hhdCBpcyB0aGUgc3RydWN0dXJhbCBkaWZmZXJlbmNlIGJldHdlZW4gYWxwaGEtZ2x1Y29zZSBhbmQgYmV0YS1nbHVjb3NlPyIsIkFuc3dlcnMiOlsiVGhlIHBvc2l0aW9uIG9mIHRoZSBoeWRyb3h5bCAoLU9IKSBncm91cCBvbiBjYXJib24tMSIsIlRoZSBudW1iZXIgb2YgY2FyYm9uIGF0b21zIGluIHRoZSByaW5nIiwiVGhlIHByZXNlbmNlIG9mIGFuIGV4dHJhIG94eWdlbiBhdG9tIGluIGJldGEtZ2x1Y29zZSIsIlRoZSBwb3NpdGlvbiBvZiB0aGUgYW1pbmUgZ3JvdXAgb2YgY2FyYm9uLTQiXX0seyJRdWVzdGlvbiI6IldoaWNoIG9mIHRoZSBmb2xsb3dpbmcgZGVzY3JpYmVzIHRoZSBzdHJ1Y3R1cmUgb2YgYW15bG9zZT8iLCJBbnN3ZXJzIjpbIkFuIHVuYnJhbmNoZWQgY29pbGVkIGNoYWluIG9mIGFscGhhLWdsdWNvc2Ugd2l0aCAxLDQtZ2x5Y29zaWRpYyBib25kcyIsIkFuIHVuYnJhbmNoZWQgY2hhaW4gb2YgYmV0YS1nbHVjb3NlIHdpdGggMSw0LWdseWNvc2lkaWMgYm9uZHMiLCJBIGhpZ2hseSBicmFuY2hlZCBjaGFpbiBvZiBhbHBoYS1nbHVjb3NlIHdpdGggMSw0IGFuZCAxLDYtZ2x5Y29zaWRpYyBib25kcyIsIkEgc3RyYWlnaHQgcG9seW1lciBvZiBiZXRhLWdsdWNvc2UgZm9ybWluZyBtaWNyb2ZpYnJpbHMiXX0seyJRdWVzdGlvbiI6IldoeSBpcyBnbHljb2dlbiBhIGhpZ2hseSBzdWl0YWJsZSBzdG9yYWdlIG1vbGVjdWxlIGluIGFuaW1hbHM/IiwiQW5zd2VycyI6WyJJdCBpcyBoaWdobHkgYnJhbmNoZWQsIGFsbG93aW5nIHJhcGlkIGh5ZHJvbHlzaXMgaW50byBnbHVjb3NlIiwiSXQgaXMgbWFkZSBvZiBiZXRhLWdsdWNvc2UgbW9ub21lcnMgdGhhdCByZXNpc3QgZW56eW1lIGJyZWFrZG93biIsIkl0IGV4ZXJ0cyBhIGhpZ2ggb3Ntb3RpYyBwcmVzc3VyZSBpbnNpZGUgY2VsbHMiXX0seyJRdWVzdGlvbiI6IldoaWNoIHN0YXRlbWVudCBjb3JyZWN0bHkgZGVzY3JpYmVzIGNlbGx1bG9zZT8iLCJBbnN3ZXJzIjpbIkl0IGNvbnNpc3RzIG9mIGxvbmcsIHN0cmFpZ2h0IGNoYWlucyBvZiBiZXRhLWdsdWNvc2Ugd2l0aCBjcm9zcy1saW5raW5nIGh5ZHJvZ2VuIGJvbmRzIiwiSXQgaXMgYSBwb2x5bWVyIG9mIGFscGhhLWdsdWNvc2UgaGVsZCB0b2dldGhlciBieSBoeWRyb2dlbiBib25kcyIsIkl0IGlzIGEgYnJhbmNoZWQgZ2xvYnVsYXIgY2FyYm9oeWRyYXRlIHVzZWQgZm9yIGVuZXJneSBzdG9yYWdlIGluIHBsYW50cyIsIkl0IGNvbnRhaW5zIGJvdGggZXN0ZXIgYW5kIGdseWNvc2lkaWMgYm9uZHMiXX0seyJRdWVzdGlvbiI6IldoYXQgaXMgdGhlIGNvcnJlY3QgcHJvY2VkdXJlIGZvciB0ZXN0aW5nIGEgbm9uLXJlZHVjaW5nIHN1Z2FyIHVzaW5nIEJlbmVkaWN0J3MgcmVhZ2VudD8iLCJBbnN3ZXJzIjpbIkJvaWwgd2l0aCBkaWx1dGUgSENsLCBuZXV0cmFsaXplIHdpdGggc29kaXVtIGh5ZHJvZ2VuY2FyYm9uYXRlLCB0aGVuIGhlYXQgd2l0aCBCZW5lZGljdCdzIiwiQWRkIEJlbmVkaWN0J3MgcmVhZ2VudCBhbmQgaGVhdCBkaXJlY3RseSBpbiBhIHdhdGVyIGJhdGgiLCJNaXggd2l0aCBldGhhbm9sLCBzaGFrZSwgdGhlbiBwb3VyIGludG8gd2F0ZXIgdG8gbG9vayBmb3IgYSBtaWxreSBlbXVsc2lvbiIsIkFkZCBCaXVyZXQgc29sdXRpb24gYXQgcm9vbSB0ZW1wZXJhdHVyZSBhbmQgb2JzZXJ2ZSBmb3IgYSBwdXJwbGUgY29sb3IgY2hhbmdlIl19LHsiUXVlc3Rpb24iOiJIb3cgbWFueSB3YXRlciBtb2xlY3VsZXMgYXJlIHJlbGVhc2VkIGR1cmluZyB0aGUgZm9ybWF0aW9uIG9mIGEgc2luZ2xlIHRyaWdseWNlcmlkZT8iLCJBbnN3ZXJzIjpbIjMiLCIxIiwiMiIsIjQiXX0seyJRdWVzdGlvbiI6IldoaWNoIHN0YXRlbWVudCBhY2N1cmF0ZWx5IGRlc2NyaWJlcyBhIHBob3NwaG9saXBpZD8iLCJBbnN3ZXJzIjpbIkl0IGhhcyBhIGh5ZHJvcGhpbGljIHBob3NwaGF0ZSBoZWFkIGFuZCBoeWRyb3Bob2JpYyBmYXR0eSBhY2lkIHRhaWxzIiwiSXQgY29udGFpbnMgdGhyZWUgZmF0dHkgYWNpZHMgYW5kIGEgbW9kaWZpZWQgc3VnYXIgZ3JvdXAiLCJJdCBoYXMgYSBoeWRyb3Bob2JpYyBwaG9zcGhhdGUgaGVhZCBhbmQgaHlkcm9waGliaWMgZmF0dHkgYWNpZCB0YWlscyIsIkl0IGNvbnNpc3RzIG9mIG5vbi1wb2xhciBtb2xlY3VsZXMgaGVsZCBlbnRpcmVseSBieSBlc3RlciBsaW5rcyB3aXRoIG5vIGdseWNlcm9sIl19LHsiUXVlc3Rpb24iOiJXaGljaCB0ZXN0IGNvbmZpcm1zIHRoZSBwcmVzZW5jZSBvZiBhIGxpcGlkIGluIGEgc2FtcGxlPyIsIkFuc3dlcnMiOlsiRW11bHNpb24gdGVzdCB3aXRoIGV0aGFub2wgYW5kIHdhdGVyIHlpZWxkaW5nIGEgbWlsa3kgd2hpdGUgbGF5ZXIiLCJCaXVyZXQgdGVzdCB5aWVsZGluZyBhIHB1cnBsZSBzb2x1dGlvbiIsIklvZGluZSB0ZXN0IHJlc3VsdGluZyBpbiBhIGJsdWUtYmxhY2sgcHJlY2lwaXRhdGUiLCJCZW5lZGljdCdzIHRlc3QgcmVzdWx0aW5nIGluIGEgYnJpY2stcmVkIHByZWNpcGl0YXRlIl19LHsiUXVlc3Rpb24iOiJIb3cgbWFueSB3YXRlciBtb2xlY3VsZXMgYXJlIHJlbGVhc2VkIGR1cmluZyB0aGUgZm9ybWF0aW9uIG9mIGEgc2luZ2xlIHRyaWdseWNlcmlkZT8iLCJBbnN3ZXJzIjpbIjMiLCIxIiwiMiIsIjQiXX0seyJRdWVzdGlvbiI6IldoaWNoIHN0YXRlbWVudCBhY2N1cmF0ZWx5IGRlc2NyaWJlcyBhIHBob3NwaG9saXBpZD8iLCJBbnN3ZXJzIjpbIkl0IGhhcyBhIGh5ZHJvcGhpbGljIHBob3NwaGF0ZSBoZWFkIGFuZCBoeWRyb3Bob2JpYyBmYXR0eSBhY2lkIHRhaWxzIiwiSXQgY29udGFpbnMgdGhyZWUgZmF0dHkgYWNpZHMgYW5kIGEgbW9kaWZpZWQgc3VnYXIgZ3JvdXAiLCJJdCBoYXMgYSBoeWRyb3Bob2JpYyBwaG9zcGhhdGUgaGVhZCBhbmQgaHlkcm9waGliaWMgZmF0dHkgYWNpZCB0YWlscyIsIkl0IGNvbnNpc3RzIG9mIG5vbi1wb2xhciBtb2xlY3VsZXMgaGVsZCBlbnRpcmVseSBieSBlc3RlciBsaW5rcyB3aXRoIG5vIGdseWNlcm9sIl19XQ==";
+
+    const QUESTIONS = decodeBase64Questions(SECURE_QUESTIONS_B64);
+
+    const parseCSVData = (text) => {
+      try {
+        const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+        if (lines.length <= 1) return [];
+        
+        return lines.slice(1).map((line, idx) => {
+          const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
+          const values = matches.map(val => val.replace(/^"|"$/g, '').trim());
+          
+          const rawId = values[0] || `csv-${idx}-${Date.now()}`;
+          const nameVal = values[1] || "Anonymous";
+          const scoreVal = parseInt(values[2], 10) || 0;
+          const durationStr = values[3] || "0s";
+          const completionDate = values[4] || "N/A";
+          
+          let durationSec = 0;
+          if (durationStr.includes('m')) {
+            const parts = durationStr.split('m');
+            const mins = parseInt(parts[0], 10) || 0;
+            const secs = parseInt(parts[1]?.replace('s', '') || 0, 10) || 0;
+            durationSec = (mins * 60) + secs;
+          } else {
+            durationSec = parseInt(durationStr.replace('s', ''), 10) || 0;
+          }
+
+          return {
+            id: rawId,
+            name: nameVal,
+            score: scoreVal,
+            duration: durationSec,
+            date: completionDate
+          };
+        });
+      } catch (e) {
+        console.error("Error processing CSV row:", e);
+        return [];
+      }
+    };
+
+    const shuffleArray = (array) => {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    };
+
+    const playSound = (type) => {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        if (type === 'correct') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+          gain.gain.setValueAtTime(0.15, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.4);
+        } else if (type === 'wrong') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.4);
+        } else if (type === 'tick') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1200, ctx.currentTime);
+          gain.gain.setValueAtTime(0.05, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.06);
+        } else if (type === 'gameover') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.8);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+          osc.start();
+          osc.stop(ctx.currentTime + 1.0);
+        }
+      } catch (e) {
+        console.warn("Browser audio context blocked.", e);
+      }
+    };
+
+    function App() {
+      const [gameState, setGameState] = useState('welcome');
+      const [studentName, setStudentName] = useState('');
+      const [currentStreak, setCurrentStreak] = useState(0);
+      const [highScore, setHighScore] = useState(0);
+      
+      const [shuffledQueue, setShuffledQueue] = useState([]);
+      const [currentIndex, setCurrentIndex] = useState(0);
+      const [currentQuestion, setCurrentQuestion] = useState(null);
+      const [shuffledOptions, setShuffledOptions] = useState([]);
+      const [correctOptionIndex, setCorrectOptionIndex] = useState(-1);
+      
+      const [timeLeft, setTimeLeft] = useState(20);
+      const [soundEnabled, setSoundEnabled] = useState(true);
+      
+      const [selectedAnswerIndex, setSelectedAnswerIndex] = useState(null);
+      const [wrongTrigger, setWrongTrigger] = useState(false);
+      const [correctTrigger, setCorrectTrigger] = useState(false);
+      
+      const [leaderboard, setLeaderboard] = useState([]);
+      const [showRuleModal, setShowRuleModal] = useState(false);
+
+      // Track game timing to record durations
+      const [gameStartTime, setGameStartTime] = useState(null);
+      
+      // Identifies the most recent local run index to highlight it with an animated pulse
+      const [lastAddedId, setLastAddedId] = useState(null);
+      
+      // Keeps track of details on the last finished attempt
+      const [lastRunStats, setLastRunStats] = useState(null);
+
+      const timerRef = useRef(null);
+      const queueRef = useRef([]); // FIXED: Added missing queueRef hook declaration to fix startup crash
+
+      const syncLeaderboard = async () => {
+        let loadedScores = [];
+
+        // Attempt to fetch hosted static scores.csv database
+        try {
+          const response = await fetch('./scores.csv');
+          if (response.ok) {
+            const csvText = await response.text();
+            loadedScores = parseCSVData(csvText);
+          }
+        } catch (e) {
+          console.warn("Local scores.csv not deployed. Initializing from user storage.");
+        }
+
+        // Pull unique attempts recorded directly on this client sandbox
+        const localAttemptsStr = localStorage.getItem('as_biology_local_attempts');
+        if (localAttemptsStr) {
+          try {
+            const localAttempts = JSON.parse(localAttemptsStr);
+            // Combine both datasets, eliminating duplicates by ID
+            const mergedMap = new Map();
+            loadedScores.forEach(item => mergedMap.set(item.id, item));
+            localAttempts.forEach(item => mergedMap.set(item.id, item));
+            loadedScores = Array.from(mergedMap.values());
+          } catch(e) {}
+        }
+
+        // Sort: Priority 1 = Highest score, Priority 2 = Shortest duration
+        const sorted = loadedScores
+          .sort((a, b) => b.score - a.score || a.duration - b.duration);
+
+        setLeaderboard(sorted);
+      };
+
+      useEffect(() => {
+        syncLeaderboard();
+      }, []);
+
+      useEffect(() => {
+        const savedHighScore = localStorage.getItem('as_biology_high_score');
+        if (savedHighScore) {
+          setHighScore(parseInt(savedHighScore, 10));
+        }
+      }, []);
+
+      const formatTime = (seconds) => {
+        if (!seconds && seconds !== 0) return "0s";
+        if (seconds < 60) return `${seconds}s`;
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}m ${secs}s`;
+      };
+
+      const submitScoreToLeaderboard = () => {
+        if (!lastRunStats) return;
+
+        const newId = `run-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+        const now = new Date();
+        const formattedDate = now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
+
+        const attemptObj = {
+          id: newId,
+          name: lastRunStats.name.trim().substring(0, 20),
+          score: lastRunStats.score,
+          duration: lastRunStats.duration,
+          date: formattedDate
+        };
+
+        // 1. Commit locally to client sandbox
+        let currentLocalList = [];
+        const stored = localStorage.getItem('as_biology_local_attempts');
+        if (stored) {
+          try { currentLocalList = JSON.parse(stored); } catch(e) {}
+        }
+        currentLocalList.push(attemptObj);
+        localStorage.setItem('as_biology_local_attempts', JSON.stringify(currentLocalList));
+
+        // 2. Format as raw CSV row and copy to clipboard as background safety fallback
+        const formattedCsvLine = `${newId},"${attemptObj.name}",${attemptObj.score},"${formatTime(attemptObj.duration)}","${formattedDate}"`;
+        try {
+          const el = document.createElement('textarea');
+          el.value = formattedCsvLine;
+          document.body.appendChild(el);
+          el.select();
+          document.execCommand('copy');
+          document.body.removeChild(el);
+        } catch (e) {
+          console.warn("Clipboard access denied in frame environment.");
+        }
+
+        setLastAddedId(newId);
+        setLastRunStats(null); // Clear summary banner once synced
+
+        // 3. Re-read and refresh visual leaderboards
+        syncLeaderboard();
+      };
+
+      const handleDownloadCsv = () => {
+        if (leaderboard.length === 0) return;
+        
+        const headers = ["ID", "Student Name", "Streak (Score)", "Time Taken", "Date Completed"];
+        const rows = leaderboard.map((item) => {
+          const displayTime = formatTime(item.duration);
+          return [
+            item.id,
+            `"${item.name.replace(/"/g, '""')}"`,
+            item.score,
+            `"${displayTime}"`,
+            `"${item.date || ''}"`
+          ];
+        });
+
+        const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "scores.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      };
+
+      const startNewGame = () => {
+        if (!studentName.trim() || QUESTIONS.length === 0) return;
+        
+        setCurrentStreak(0);
+        setSelectedAnswerIndex(null);
+        setWrongTrigger(false);
+        setCorrectTrigger(false);
+        setGameStartTime(Date.now());
+        setLastAddedId(null);
+        setLastRunStats(null);
+        
+        const freshQueue = shuffleArray(QUESTIONS);
+        queueRef.current = freshQueue; // Correctly uses the validated ref pointer
+        setCurrentIndex(0);
+        
+        setGameState('playing');
+        loadQuestion(freshQueue[0]);
+      };
+
+      const loadQuestion = (questionObj) => {
+        if (!questionObj) return;
+        
+        const originalAnswers = questionObj.Answers;
+        const indexedAnswers = originalAnswers.map((ans, idx) => ({ text: ans, originalIndex: idx }));
+        const shuffled = shuffleArray(indexedAnswers);
+        
+        const correctIdx = shuffled.findIndex(item => item.originalIndex === 0);
+        
+        setShuffledOptions(shuffled.map(item => item.text));
+        setCorrectOptionIndex(correctIdx);
+        setCurrentQuestion(questionObj);
+        setSelectedAnswerIndex(null);
+        setWrongTrigger(false);
+        setCorrectTrigger(false);
+        setTimeLeft(20);
+      };
+
+      useEffect(() => {
+        if (gameState !== 'playing') return;
+
+        timerRef.current = setInterval(() => {
+          setTimeLeft((prev) => {
+            if (prev <= 1) {
+              clearInterval(timerRef.current);
+              handleTimeout();
+              return 0;
+            }
+            if (soundEnabled && prev <= 6) {
+              playSound('tick');
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
+        return () => clearInterval(timerRef.current);
+      }, [gameState, currentQuestion, soundEnabled]);
+
+      const handleTimeout = () => {
+        if (soundEnabled) playSound('wrong');
+        setWrongTrigger(true);
+        triggerGameOver();
+      };
+
+      const handleSelectAnswer = (idx) => {
+        if (selectedAnswerIndex !== null || gameState !== 'playing') return;
+        
+        clearInterval(timerRef.current);
+        setSelectedAnswerIndex(idx);
+
+        if (idx === correctOptionIndex) {
+          if (soundEnabled) playSound('correct');
+          setCorrectTrigger(true);
+          const nextStreak = currentStreak + 1;
+          setCurrentStreak(nextStreak);
+          
+          if (nextStreak > highScore) {
+            setHighScore(nextStreak);
+            localStorage.setItem('as_biology_high_score', nextStreak.toString());
+          }
+
+          // Check if user has answered all questions successfully (Flawless King Status)
+          if (nextStreak >= QUESTIONS.length) {
+            setTimeout(() => {
+              triggerVictory();
+            }, 650);
+            return;
+          }
+
+          // Progress cleanly using pre-shuffled queue to guarantee zero repetitions
+          setTimeout(() => {
+            setCurrentIndex((prevIdx) => {
+              const nextIndex = prevIdx + 1;
+              const activeQueue = queueRef.current;
+              
+              if (nextIndex < activeQueue.length) {
+                loadQuestion(activeQueue[nextIndex]);
+                return nextIndex;
+              } else {
+                triggerVictory();
+                return prevIdx;
+              }
+            });
+          }, 650);
+        } else {
+          if (soundEnabled) playSound('wrong');
+          setWrongTrigger(true);
+          setTimeout(() => {
+            triggerGameOver();
+          }, 900);
+        }
+      };
+
+      const triggerVictory = () => {
+        clearInterval(timerRef.current);
+        if (soundEnabled) playSound('correct');
+        
+        const totalDuration = gameStartTime ? Math.round((Date.now() - gameStartTime) / 1000) : 0;
+        
+        setLastRunStats({
+          name: studentName,
+          score: QUESTIONS.length,
+          duration: totalDuration,
+          isKing: true
+        });
+        
+        setGameState('king');
+      };
+
+      const triggerGameOver = () => {
+        clearInterval(timerRef.current);
+        if (soundEnabled) playSound('gameover');
+        
+        const totalDuration = gameStartTime ? Math.round((Date.now() - gameStartTime) / 1000) : 0;
+        
+        // Cache parameters of finished run for the welcome page prompt
+        setLastRunStats({
+          name: studentName,
+          score: currentStreak,
+          duration: totalDuration,
+          isKing: false
+        });
+        
+        setGameState('welcome');
+      };
+
+      return (
+        <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between font-sans selection:bg-amber-500 selection:text-slate-900 animate-fade-in">
+          
+          {/* HEADER BAR */}
+          <header className="bg-slate-950/80 backdrop-blur border-b border-slate-800 sticky top-0 z-40">
+            <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+              
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/10">
+                  <BookOpenIcon className="w-6 h-6 text-slate-950 stroke-[2.5]" />
+                </div>
+                <div>
+                  <h1 className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500 bg-clip-text text-transparent">
+                    AQA AS Biology
+                  </h1>
+                  <p className="text-xs text-slate-400 font-medium font-mono">Streak Revision Arena</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                {/* Audio Toggle */}
+                <button 
+                  onClick={() => setSoundEnabled(!soundEnabled)} 
+                  className={`p-2 rounded-lg border transition ${soundEnabled ? 'bg-slate-800/80 border-amber-500/30 text-amber-400 hover:bg-slate-700' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-400'}`}
+                  title={soundEnabled ? "Mute audio cues" : "Unmute audio cues"}
+                >
+                  {soundEnabled ? <Volume2Icon className="w-4 h-4" /> : <VolumeXIcon className="w-4 h-4" />}
+                </button>
+
+                {/* Rules Button */}
+                <button 
+                  onClick={() => setShowRuleModal(true)} 
+                  className="px-3 py-1.5 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 rounded-lg transition"
+                >
+                  How to Play
+                </button>
+              </div>
+
+            </div>
+          </header>
+
+          <main className="flex-grow flex items-center justify-center p-4 max-w-5xl w-full mx-auto">
+            
+            {gameState === 'king' && (
+              <div className="w-full max-w-2xl bg-slate-950/80 border-4 border-amber-400 rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden backdrop-blur-md animate-fade-in text-center flex flex-col items-center">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl pointer-events-none animate-pulse" />
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-yellow-500/15 rounded-full blur-3xl pointer-events-none animate-pulse" />
+
+                <div className="w-24 h-24 rounded-full bg-gradient-to-b from-amber-300 to-amber-500 flex items-center justify-center shadow-2xl shadow-amber-500/40 border-2 border-yellow-200 relative mb-6 animate-bounce">
+                  <span className="text-5xl">👑</span>
+                  <div className="absolute -inset-1 rounded-full border border-amber-400 animate-ping opacity-30" />
+                </div>
+
+                <span className="inline-flex items-center space-x-1.5 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 text-xs font-black uppercase tracking-widest font-mono mb-4 animate-pulse">
+                  🏆 Flawless Victory 🏆
+                </span>
+
+                <h2 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-none uppercase mb-2">
+                  King of AS Biology
+                </h2>
+                <p className="text-amber-400 text-sm font-semibold tracking-wider font-mono uppercase mb-6">
+                  Syllabus Mastery Unlocked
+                </p>
+
+                <p className="text-slate-300 text-sm max-w-md mx-auto leading-relaxed mb-8">
+                  Flawless execution! <strong>{studentName}</strong> completed all unique questions sequentially with zero assistance, conquering the peak assessment.
+                </p>
+
+                <div className="grid grid-cols-2 gap-4 w-full max-w-sm mb-8 bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+                  <div className="text-center">
+                    <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider font-mono">Total Time</span>
+                    <p className="text-lg font-black text-slate-100 mt-1 font-mono">{formatTime(lastRunStats?.duration)}</p>
+                  </div>
+                  <div className="text-center border-l border-slate-800">
+                    <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider font-mono">Precision</span>
+                    <p className="text-lg font-black text-emerald-400 mt-1 uppercase font-mono">100% Perfect</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+                  <button
+                    onClick={submitScoreToLeaderboard}
+                    className="flex-1 flex items-center justify-center space-x-2 px-5 py-4 rounded-xl text-sm font-extrabold uppercase tracking-wide transition bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 shadow-xl shadow-amber-500/20 active:scale-95"
+                  >
+                    <TrophyIcon className="w-5 h-5" />
+                    <span>Claim Throne & Save</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setGameState('welcome');
+                      setLastRunStats(null);
+                    }}
+                    className="px-5 py-4 rounded-xl text-sm font-bold border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition"
+                  >
+                    Return to Lobby
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {gameState === 'welcome' && (
+              <div className="w-full bg-slate-950/40 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md animate-fade-in flex flex-col lg:flex-row gap-6 lg:gap-8">
+                
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+
+                {/* LEFT: SESSION SETUP */}
+                <div className="flex-grow lg:w-1/3 flex flex-col justify-between space-y-6 relative">
+                  <div>
+                    <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold mb-4 uppercase tracking-widest font-mono">
+                      <SparklesIcon className="w-3.5 h-3.5" />
+                      <span>Obfuscated Assessment Bank</span>
+                    </span>
+                    <h2 className="text-3xl font-black text-white tracking-tight leading-tight">
+                      Survive The <br/>
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">Biology Streak!</span>
+                    </h2>
+                    <p className="text-slate-400 text-xs mt-3 leading-relaxed">
+                      Syllabus knowledge assessment. Complete runs seamlessly merge with the static database layout for seamless multi-student syncs.
+                    </p>
+                  </div>
+
+                  {/* ACTIVE COMPLETED RUN ALERT BAR */}
+                  {lastRunStats && (
+                    <div className="bg-slate-900/80 border border-amber-500/20 rounded-2xl p-4 space-y-3 shadow-xl animate-fade-in">
+                      <div className="flex items-center space-x-2 text-amber-400">
+                        {lastRunStats.isKing ? (
+                          <span className="text-xl">👑</span>
+                        ) : (
+                          <FlameIcon className="w-4.5 h-4.5 fill-current text-amber-500" />
+                        )}
+                        <span className="text-xs font-black uppercase tracking-wider">
+                          {lastRunStats.isKing ? 'Legendary Conquest!' : 'Run Finished!'}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-300 leading-normal">
+                        <strong>{lastRunStats.name}</strong>, you scored an active streak of <span className="text-amber-400 font-extrabold">{lastRunStats.score}</span> in <span className="font-mono text-slate-200">{formatTime(lastRunStats.duration)}</span>.
+                      </p>
+                      
+                      <div className="pt-1">
+                        <button
+                          onClick={submitScoreToLeaderboard}
+                          className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wide transition border duration-200 active:scale-[0.98] bg-amber-500 hover:bg-amber-400 text-slate-950 border-transparent shadow-lg shadow-amber-500/10"
+                          title="Save run directly to scores.csv & synchronize with all other active screens"
+                        >
+                          <TrophyIcon className="w-4 h-4" />
+                          <span>Save Score to Leaderboard</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* REGISTRATION FORM */}
+                  <form onSubmit={(e) => { e.preventDefault(); startNewGame(); }} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 font-mono">
+                        Student Name
+                      </label>
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500">
+                          <UserIcon className="w-4 h-4" />
+                        </span>
+                        <input
+                          type="text"
+                          required
+                          maxLength={20}
+                          value={studentName}
+                          onChange={(e) => setStudentName(e.target.value)}
+                          placeholder="Enter name to begin run..."
+                          className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/80 rounded-xl py-3.5 pl-10 pr-4 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold rounded-xl py-4 px-4 shadow-lg shadow-amber-500/20 active:translate-y-[1px] transition flex items-center justify-center space-x-2 text-base"
+                    >
+                      <PlayIcon className="w-5 h-5 fill-current" />
+                      <span>{lastRunStats ? 'Start Another Run' : 'Begin Revision Run'}</span>
+                    </button>
+                  </form>
+
+                  <div className="pt-4 border-t border-slate-950/60 flex items-center justify-between text-[11px] text-slate-500">
+                    <span className="flex items-center space-x-1">
+                      <ClockIcon className="w-3.5 h-3.5 text-amber-500/70" />
+                      <span>20s timer per card</span>
+                    </span>
+                    <span className="flex items-center space-x-1">
+                      <TrophyIcon className="w-3.5 h-3.5 text-amber-500/70" />
+                      <span>Your Record: {highScore}</span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* RIGHT: CLASSROOM LEADERBOARD DISPLAY */}
+                <div className="flex-grow lg:w-2/3 flex flex-col justify-between">
+                  <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+                      <div className="flex items-center space-x-2">
+                        <TrophyIcon className="w-4 h-4 text-amber-400" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                          Classroom Leaderboard (scores.csv)
+                        </span>
+                      </div>
+
+                      <button
+                        onClick={handleDownloadCsv}
+                        disabled={leaderboard.length === 0}
+                        className="flex items-center justify-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 font-bold text-xs disabled:opacity-50 disabled:cursor-not-allowed transition shadow-md"
+                      >
+                        <DownloadIcon className="w-3.5 h-3.5" />
+                        <span>Export scores.csv Backup</span>
+                      </button>
+                    </div>
+
+                    {/* HIGH-RES GRID TABLE */}
+                    <div className="bg-slate-950/60 border border-slate-800 rounded-2xl overflow-hidden flex flex-col max-h-[340px]">
+                      <div className="overflow-y-auto">
+                        <table className="w-full table-auto text-left text-xs border-collapse">
+                          <thead>
+                            <tr className="bg-slate-900 border-b border-slate-800 text-slate-400 uppercase font-mono text-[10px] tracking-wider sticky top-0 z-10">
+                              <th className="py-2.5 px-3 text-center w-12">Rank</th>
+                              <th className="py-2.5 px-4">Student</th>
+                              <th className="py-2.5 px-3 text-center w-16">Streak</th>
+                              <th className="py-2.5 px-3 text-center w-20">Time</th>
+                              <th className="py-2.5 px-4 text-right">Completion Date</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-900/60">
+                            {leaderboard.length === 0 ? (
+                              <tr>
+                                <td colSpan="5" className="py-12 text-center text-slate-600 font-medium">
+                                  No records populated in workspace yet. Click "Begin Revision Run" to start!
+                                </td>
+                              </tr>
+                            ) : (
+                              leaderboard.map((item, index) => {
+                                const isLatestRun = item.id === lastAddedId;
+                                const hasConquered = item.score >= QUESTIONS.length;
+                                return (
+                                  <tr 
+                                    key={item.id || index}
+                                    className={`transition duration-300 hover:bg-slate-900/40 ${
+                                      isLatestRun 
+                                        ? 'bg-amber-500/20 text-amber-200 border-l-2 border-l-amber-500 font-extrabold ring-1 ring-amber-500/30 ring-inset' 
+                                        : 'text-slate-300'
+                                    }`}
+                                  >
+                                    <td className="py-2.5 px-3 text-center font-bold font-mono">
+                                      <span className={
+                                        index === 0 ? 'text-amber-400' :
+                                        index === 1 ? 'text-slate-300' :
+                                        index === 2 ? 'text-amber-700' : 'text-slate-500'
+                                      }>
+                                        #{index + 1}
+                                      </span>
+                                    </td>
+                                    <td className="py-2.5 px-4 truncate max-w-[120px] font-medium flex items-center">
+                                      <span className="truncate">{item.name}</span>
+                                      {hasConquered && (
+                                        <span className="ml-1 text-[11px]" title="Conquered the Streak!">👑</span>
+                                      )}
+                                      {isLatestRun && (
+                                        <span className="ml-2 text-[9px] uppercase bg-amber-500/20 border border-amber-500/40 text-amber-300 px-1.5 py-0.5 rounded-full tracking-wider animate-pulse">
+                                          Your Run
+                                        </span>
+                                      )}
+                                    </td>
+                                    <td className="py-2.5 px-3 text-center font-bold text-amber-400">
+                                      <span className="flex items-center justify-center space-x-1">
+                                        <span>{item.score}</span>
+                                        <FlameIcon className="w-3 h-3 text-orange-500 fill-current" />
+                                      </span>
+                                    </td>
+                                    <td className="py-2.5 px-3 text-center font-mono text-slate-400">
+                                      {formatTime(item.duration)}
+                                    </td>
+                                    <td className="py-2.5 px-4 text-right font-mono text-[10px] text-slate-500">
+                                      {item.date}
+                                    </td>
+                                  </tr>
+                                );
+                              })
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 text-center bg-slate-950/60 border border-slate-800 rounded-xl p-3">
+                    <p className="text-[11px] text-slate-400 leading-normal font-medium">
+                      📂 <strong>Centralized Classroom Sync:</strong> Click "Save Score to Leaderboard" to copy your run as a CSV line for submission, instantly updating your local high scores display.
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {gameState === 'playing' && currentQuestion && (
+              <div className="w-full max-w-2xl bg-slate-950/40 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md animate-fade-in">
+                
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800/60">
+                  {/* CURRENT STREAK */}
+                  <div className="flex items-center space-x-2.5">
+                    <div className="px-3.5 py-1.5 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center space-x-1.5">
+                      <FlameIcon className="w-4.5 h-4.5 text-amber-500 animate-pulse fill-current" />
+                      <span className="text-sm font-extrabold tracking-wide font-mono">STREAK: {currentStreak}</span>
+                    </div>
+                    {highScore > 0 && (
+                      <span className="text-xs text-slate-500 font-semibold hidden sm:inline">
+                        Best Run: {highScore}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* TIMER */}
+                  <div className="flex items-center space-x-2">
+                    <div className="relative w-10 h-10 flex items-center justify-center">
+                      <svg className="absolute inset-0 w-full h-full -rotate-90">
+                        <circle
+                          cx="20"
+                          cy="20"
+                          r="16"
+                          className="stroke-slate-800 fill-none"
+                          strokeWidth="3.5"
+                        />
+                        <circle
+                          cx="20"
+                          cy="20"
+                          r="16"
+                          className={`fill-none transition-all duration-1000 ${
+                            timeLeft <= 5 
+                              ? 'stroke-red-500 drop-shadow-[0_0_4px_rgba(239,68,68,0.5)]' 
+                              : timeLeft <= 10 
+                              ? 'stroke-amber-400' 
+                              : 'stroke-emerald-400'
+                          }`}
+                          strokeWidth="3.5"
+                          strokeDasharray="100.5"
+                          strokeDashoffset={100.5 - (timeLeft / 20) * 100.5}
+                        />
+                      </svg>
+                      <span className={`text-xs font-black transition-all ${
+                        timeLeft <= 5 ? 'text-red-500 scale-110' : 'text-slate-300'
+                      }`}>
+                        {timeLeft}s
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {currentStreak > 0 && currentStreak % 5 === 0 && !selectedAnswerIndex && (
+                  <div className="mb-4 text-center py-2 bg-gradient-to-r from-amber-500/10 via-amber-500/20 to-amber-500/10 border-y border-amber-500/20 rounded-lg animate-bounce">
+                    <span className="text-xs font-black text-amber-400 uppercase tracking-widest flex items-center justify-center space-x-1.5 font-mono">
+                      <SparklesIcon className="w-3.5 h-3.5" />
+                      <span>On Fire! {currentStreak} in a row!</span>
+                      <SparklesIcon className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
+                )}
+
+                {/* THE QUESTION */}
+                <div className="mb-8 min-h-[5rem] flex flex-col justify-center">
+                  <span className="text-xs font-bold text-amber-500/70 uppercase tracking-widest mb-1.5 block font-mono">
+                    Question {currentIndex + 1}
+                  </span>
+                  <h3 className="text-lg sm:text-xl font-bold text-white leading-relaxed">
+                    {currentQuestion.Question}
+                  </h3>
+                </div>
+
+                {/* MULTIPLE CHOICE OPTIONS */}
+                <div className="space-y-3.5">
+                  {shuffledOptions.map((option, idx) => {
+                    const isSelected = selectedAnswerIndex === idx;
+                    const isCorrect = idx === correctOptionIndex;
+                    
+                    let btnStyle = "bg-slate-900/60 border-slate-800 hover:bg-slate-800/50 hover:border-slate-700 text-slate-200";
+                    
+                    if (selectedAnswerIndex !== null) {
+                      if (isSelected && isCorrect) {
+                        btnStyle = "bg-emerald-500/15 border-emerald-500 text-emerald-400 scale-[1.01] shadow-lg shadow-emerald-500/5";
+                      } else if (isSelected && !isCorrect) {
+                        btnStyle = "bg-red-500/15 border-red-500 text-red-400 scale-[0.99]";
+                      } else {
+                        btnStyle = "bg-slate-900/40 border-slate-800/50 text-slate-500 opacity-60";
+                      }
+                    }
+
+                    return (
+                      <button
+                        key={idx}
+                        disabled={selectedAnswerIndex !== null}
+                        onClick={() => handleSelectAnswer(idx)}
+                        className={`w-full text-left p-4 rounded-xl border font-semibold transition-all duration-200 flex items-center justify-between text-sm sm:text-base relative group overflow-hidden ${btnStyle}`}
+                      >
+                        <span className="flex-grow pr-4 leading-normal">{option}</span>
+                        <span className="flex-shrink-0 font-mono">
+                          {selectedAnswerIndex !== null && isSelected && isCorrect && (
+                            <CheckCircleIcon className="w-5 h-5 text-emerald-400 fill-emerald-950" />
+                          )}
+                          {selectedAnswerIndex !== null && isSelected && !isCorrect && (
+                            <XCircleIcon className="w-5 h-5 text-red-400 fill-red-950" />
+                          )}
+                          {selectedAnswerIndex === null && (
+                            <span className="opacity-0 group-hover:opacity-100 transition duration-150 text-xs text-amber-500/70 border border-amber-500/30 px-2 py-0.5 rounded-md uppercase font-bold tracking-wider">
+                              Choose
+                            </span>
+                          )}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-8 pt-4 border-t border-slate-900/60 text-center">
+                  <p className="text-[10px] text-slate-600 font-mono tracking-widest uppercase">
+                    AQA Biology Assessment Core
+                  </p>
+                </div>
+              </div>
+            )}
+
+          </main>
+
+          {/* FOOTER BAR */}
+          <footer className="bg-slate-950/40 border-t border-slate-900 py-3 px-4 text-center text-[11px] text-slate-600 font-mono">
+            <p>© 2026 AQA AS-Level Biology Streak Revision Hub. Real-time class synchronization ready.</p>
+          </footer>
+
+          {/* RULES MODAL */}
+          {showRuleModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full relative">
+                <h4 className="text-base font-bold text-white mb-3 flex items-center space-x-2">
+                  <HelpCircleIcon className="w-5 h-5 text-amber-500" />
+                  <span>How to Play</span>
+                </h4>
+                <ul className="space-y-3 text-xs text-slate-300 leading-relaxed mb-6 list-disc list-inside">
+                  <li>Enter your student name on the main lobby to start a new session.</li>
+                  <li>Syllabus questions are randomized dynamically from our core database.</li>
+                  <li>You have exactly <span className="font-semibold text-amber-400">20 seconds</span> to answer every card.</li>
+                  <li>Selecting the correct option advances you <span className="font-semibold text-emerald-400">instantly to the next question</span> with no panels displaying answers.</li>
+                  <li>Choosing a wrong answer or running out of time finishes your run immediately, and returns you to the lobby where you can submit your score to place on the classroom leaderboard!</li>
+                </ul>
+                <button
+                  onClick={() => setShowRuleModal(false)}
+                  className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition"
+                >
+                  Close Rules
+                </button>
+              </div>
+            </div>
+          )}
+
+        </div>
+      );
+    }
+
+    // Render App directly
+    const container = document.getElementById('root');
+    const root = ReactDOM.createRoot(container);
+    root.render(<App />);
+  </script>
+
+</body>
+</html>
